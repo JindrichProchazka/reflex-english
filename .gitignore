@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.tools/
+npm-runtime.tgz
+test-results/
+playwright-report/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.log
