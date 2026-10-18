@@ -1,15 +1,15 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import {
-  beginSession,
   loadDashboard,
+  loadReviewSession,
   recordAnswer,
   prepareAssessment,
   revealReference,
   sessionContent,
   sessionExercise,
 } from './application/learning';
-import { concepts } from './content/prepositions';
+import { drillById, drillForConcept } from './content/drills';
 import { APP_NAME } from './config';
 import { db } from './data/database';
 import type { Session } from './domain/models';
@@ -48,6 +48,9 @@ const BackupPage = lazy(() =>
 const WeakAreasPage = lazy(() =>
   import('./features/WeakAreas').then((m) => ({ default: m.WeakAreasPage })),
 );
+const DrillsPage = lazy(() =>
+  import('./features/Drills').then((m) => ({ default: m.DrillsPage })),
+);
 
 const date = (timestamp: number) =>
   new Date(timestamp).toLocaleString(undefined, {
@@ -78,19 +81,6 @@ function useDashboard() {
 }
 function Home() {
   const { data, error } = useDashboard();
-  const navigate = useNavigate();
-  const [busy, setBusy] = useState(false);
-  const [startError, setStartError] = useState('');
-  async function start() {
-    setBusy(true);
-    try {
-      const session = await beginSession(db);
-      navigate(`/review/${session.id}`);
-    } catch {
-      setStartError('Could not save your session. Please try again.');
-      setBusy(false);
-    }
-  }
   if (error) return <p role="alert">{error}</p>;
   if (!data) return <p role="status">Opening your practice notebook…</p>;
   const clean = data.attempts.filter((a) => a.assistance === 'none');
@@ -132,22 +122,27 @@ function Home() {
       </section>
       <section className="card feature">
         <div>
-          <p className="eyebrow">YOUR NEXT PRACTICE</p>
-          <h2>Small words. Clear meaning.</h2>
-          <p>IN / ON / AT · Time, place & getting around</p>
+          <p className="eyebrow">SHORT GRAMMAR & COLLOCATION PRACTICE</p>
+          <h2>Quick Reflex Drills</h2>
+          <p>Build automatic recall of useful grammar and everyday patterns.</p>
           <p className="muted">
-            12 concepts, with delayed recall. Usually 5–10 minutes; mistakes add
-            practice, never penalties.
+            Choose an area, then Quick, Normal or Due Review. Mistakes add
+            retrieval practice, never penalties.
           </p>
         </div>
-        <button onClick={start} disabled={busy}>
-          {busy ? 'Opening…' : data.active ? 'Continue review' : 'Start review'}{' '}
-          <span aria-hidden="true">→</span>
-        </button>
+        <Link className="button" to="/drills">
+          Open Quick Reflex Drills <span aria-hidden="true">→</span>
+        </Link>
+        {data.active && (
+          <p>
+            <Link to={`/review/${data.active.id}`}>
+              Continue previous IN / ON / AT review
+            </Link>
+          </p>
+        )}
         <p className="fine">
           You can leave at any time. Your place is saved after every answer.
         </p>
-        {startError && <p role="alert">{startError}</p>}
       </section>
       <WeakAreasCard />
       <section className="two-col">
@@ -158,8 +153,8 @@ function Home() {
             similar contexts, so you learn the distinction.
           </p>
           <p>
-            Type the missing preposition. If you miss it, a hint comes first.
-            You’ll meet the concept again in another sentence.
+            Type the missing word or verb form. If you miss it, a hint comes
+            first. You’ll meet the concept again in another sentence.
           </p>
           <details>
             <summary>Before you start: a short guide</summary>
@@ -216,8 +211,9 @@ function Home() {
             {data.mistakes.slice(0, 3).map((m) => (
               <li key={m.conceptId}>
                 <strong>
-                  {concepts.find((c) => c.id === m.conceptId)?.title ??
-                    'Vocabulary to revisit'}
+                  {drillForConcept(m.conceptId)?.concepts.find(
+                    (c) => c.id === m.conceptId,
+                  )?.title ?? 'Vocabulary to revisit'}
                 </strong>
                 <p>
                   {m.prompt}{' '}
@@ -241,7 +237,7 @@ function Home() {
                         ? `/vocabulary/lessons/${m.conceptId.split(':')[1]}?mode=${m.conceptId.endsWith(':context') ? 'context' : 'recall'}`
                         : m.conceptId.startsWith('vocab:')
                           ? '/vocabulary'
-                          : '/'
+                          : '/drills'
                     }
                   >
                     {m.conceptId.startsWith('lesson:')
@@ -285,8 +281,7 @@ function Review() {
   const submitting = useRef(false);
   useEffect(() => {
     let alive = true;
-    db.sessions
-      .get(id ?? '')
+    loadReviewSession(db, id ?? '')
       .then((s) => {
         if (alive) {
           if (s) setSession(s);
@@ -410,6 +405,11 @@ function Review() {
   const vocabulary =
     session.module === 'vocabulary' &&
     (!session.weakAreaIds || Boolean(exercise.entryId));
+  const drill = drillById(session.drillId ?? '');
+  const preposition =
+    !exercise.entryId &&
+    (drillForConcept(exercise.conceptId)?.category ?? 'preposition') ===
+      'preposition';
   return (
     <section className="practice">
       <div className="practice-meta">
@@ -421,7 +421,9 @@ function Review() {
                 ? `/worksheets/${session.worksheetId}/results`
                 : vocabulary
                   ? '/vocabulary'
-                  : '/'
+                  : drill
+                    ? '/drills'
+                    : '/'
           }
         >
           ← Save & return{' '}
@@ -431,7 +433,9 @@ function Review() {
               ? 'to paper results'
               : vocabulary
                 ? 'to vocabulary'
-                : 'home'}
+                : drill
+                  ? 'to drills'
+                  : 'home'}
         </Link>
         <span>{session.processed} prompts completed</span>
       </div>
@@ -440,7 +444,9 @@ function Review() {
           ? 'WEAK AREAS'
           : vocabulary
             ? 'VOCABULARY'
-            : 'IN / ON / AT'}{' '}
+            : (drill?.title ??
+              drillForConcept(exercise.conceptId)?.title ??
+              'IN / ON / AT')}{' '}
         ·{' '}
         {initial && session.acquisition
           ? 'FOCUSED PRACTICE'
@@ -468,7 +474,7 @@ function Review() {
             ? 'Recall the meaning, then make the language useful.'
             : initial
               ? concept.title
-              : 'Recall the preposition from the meaning of the sentence.'}
+              : 'Recall the missing form from the meaning of the sentence.'}
       </p>
       <div className="card exercise">
         <p className="prompt" data-testid="prompt">
@@ -524,7 +530,7 @@ function Review() {
         ) : (
           <form onSubmit={submit}>
             <label htmlFor="answer">
-              {vocabulary ? 'Your answer' : 'Missing preposition'}
+              {preposition ? 'Missing preposition' : 'Your answer'}
             </label>
             <div className="answer-row">
               <textarea
@@ -659,6 +665,13 @@ function Summary({ session }: { session: Session }) {
           </Link>
         </p>
       )}
+      {session.drillId && (
+        <p>
+          <Link className="button" to="/drills">
+            Return to Quick Reflex Drills
+          </Link>
+        </p>
+      )}
       {session.module === 'vocabulary' && !session.weakAreaIds && (
         <p>
           <Link to="/vocabulary">Return to vocabulary library</Link>
@@ -714,6 +727,7 @@ export default function App() {
           <Routes key={dataEpoch}>
             <Route path="/mistakes" element={<WeakAreasPage />} />
             <Route path="/data" element={<BackupPage />} />
+            <Route path="/drills" element={<DrillsPage />} />
             <Route path="/" element={<Home />} />
             <Route path="/review/:id" element={<Review />} />
             <Route path="/vocabulary" element={<VocabularyLibrary />} />

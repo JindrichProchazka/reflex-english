@@ -105,6 +105,9 @@ const mistakeCategory = enumeration(
   'vocabulary',
   'collocation',
   'phrase',
+  'article',
+  'tense',
+  'grammar',
 );
 const level = enumeration('B1', 'B2', 'C1');
 const grade = enumeration('correct', 'minor', 'wrong');
@@ -126,6 +129,8 @@ const exercise = object({
   entryId: ss,
   instruction: ss,
   lessonId: ss,
+  level: optional(level),
+  topic: ss,
 });
 const concept = object({
   id: string,
@@ -228,7 +233,9 @@ export const rowSchemas: Record<string, Rule> = {
     seen: dictionary(integer),
     feedback: enumeration('none', 'hint', 'correction'),
     acquisition: bs,
-    module: optional(enumeration('prepositions', 'vocabulary')),
+    module: optional(enumeration('prepositions', 'vocabulary', 'drill')),
+    drillId: ss,
+    drillSize: optional(enumeration('quick', 'normal', 'due')),
     lessonId: ss,
     studyMode: optional(mode),
     testDirection: optional(direction),
@@ -236,6 +243,17 @@ export const rowSchemas: Record<string, Rule> = {
     worksheetId: ss,
     weakAreaIds: optional(strings),
     content: optional(array(concept)),
+    promptHistory: optional(
+      dictionary(
+        object({
+          conceptIds: strings,
+          recentIds: (value, path) => {
+            strings(value, path);
+            if ((value as string[]).length > 96) invalid(path);
+          },
+        }),
+      ),
+    ),
     assessment: optional(
       object({
         answer: string,

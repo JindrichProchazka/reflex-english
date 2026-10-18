@@ -30,7 +30,7 @@ A lesson practice pass requires all four flags for every word. The UI separately
 
 ## Persistence and compatibility
 
-IndexedDB version 3 added `studyLessons` and `lessonProgress`; the database is now version 5 after worksheet/settings additions. No new table is needed for advanced content or derived weakness. Curriculum marker `study-lessons-v2` adds only missing advanced lesson IDs in the same seed transaction, preserving existing edits, progress and snapshots. Legacy tables/functions remain readable. Backup data/content versions are now 2; old content-v1 references resolve against `initialStudyLessons`, never the expanded list. New personal capture still uses two fields.
+IndexedDB version 3 added `studyLessons` and `lessonProgress`; the database is now version 5 after worksheet/settings additions. No new table is needed for advanced content or derived weakness. Curriculum marker `study-lessons-v2` adds only missing advanced lesson IDs in the same seed transaction, preserving existing edits, progress and snapshots. Legacy tables/functions remain readable. Backups use data v4 / vocabulary content v2 after Quick Reflex Drills; old data-v1/v2 imports remain supported, and content-v1 references resolve against `initialStudyLessons`, never the expanded list. New personal capture still uses two fields.
 
 ## Verification
 

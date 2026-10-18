@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { concepts } from '../../src/content/prepositions';
+import { drillById } from '../../src/content/drills';
+const concepts = drillById('in-on-at')!.concepts;
 const exerciseFor = (prompt: string) =>
   concepts.flatMap((c) => c.exercises).find((e) => e.prompt === prompt)!;
 async function correct(page: Page) {
@@ -25,15 +26,18 @@ test('Home → grouped weakness → references → focused correction / delayed 
 }) => {
   test.setTimeout(90000);
   await page.goto('./');
+  await page.getByRole('link', { name: /Open Quick Reflex Drills/ }).click();
   await page
-    .getByRole('button', { name: 'Start review', exact: false })
+    .getByRole('region', { name: 'IN / ON / AT', exact: true })
+    .getByRole('button', { name: 'Start Normal' })
     .click();
   const original = exerciseFor(await page.getByTestId('prompt').innerText());
   const concept = concepts.find((c) => c.id === original.conceptId)!;
   await page.getByLabel('Missing preposition', { exact: true }).fill('wrong');
   await page.getByRole('button', { name: 'Check answer', exact: true }).click();
   await expect(page.getByText('Not quite. Try again.')).toBeVisible();
-  await page.getByRole('link', { name: '← Save & return home' }).click();
+  await page.getByRole('link', { name: '← Save & return to drills' }).click();
+  await page.getByRole('link', { name: '← Home', exact: true }).click();
   const homeCard = page.getByRole('region', {
     name: 'Weak Areas',
     exact: true,

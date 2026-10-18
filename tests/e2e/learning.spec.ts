@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { concepts } from '../../src/content/prepositions';
+import { drillById } from '../../src/content/drills';
+const concepts = drillById('in-on-at')!.concepts;
 
 test('mistakes lead to delayed retrieval, completion and durable progress', async ({
   page,
@@ -11,7 +12,11 @@ test('mistakes lead to delayed retrieval, completion and durable progress', asyn
     path: `test-results/home-${test.info().project.name}.png`,
     fullPage: true,
   });
-  await page.getByRole('button', { name: /Start review/ }).click();
+  await page.getByRole('link', { name: /Open Quick Reflex Drills/ }).click();
+  await page
+    .getByRole('region', { name: 'IN / ON / AT', exact: true })
+    .getByRole('button', { name: 'Start Normal' })
+    .click();
   const prompt = page.getByTestId('prompt');
   const original = await prompt.innerText();
   const first = concepts
@@ -86,7 +91,7 @@ test('mistakes lead to delayed retrieval, completion and durable progress', asyn
   await context.setOffline(true);
   await page.reload();
   await expect(
-    page.getByRole('button', { name: /Start review/ }),
+    page.getByRole('link', { name: /Open Quick Reflex Drills/ }),
   ).toBeVisible();
   await expect(page.getByLabel('Learning progress')).toContainText(
     '1Sessions completed',

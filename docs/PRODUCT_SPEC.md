@@ -2018,3 +2018,314 @@ Report:
 9. Any action I must perform manually before the public app works.
 
 Do not consider the task complete until the production build and release checks pass.
+
+---
+
+# Quick Reflex Drills (2026-10-18)
+
+Add a unified Quick Reflex Drills hub, prominently linked from Home. The hub is the entry point for choosing short grammar/collocation practice, rather than listing every module on Home. Reuse the existing IN / ON / AT session engine, scheduler, correction loop, delayed retry, mastery, Weak Areas and persistence. Do not create another engine or add AI, backend, gamification or cloud sync.
+
+Each drill card shows title, short description, mastery/learning progress, due reviews, recent first-attempt accuracy and recent mistakes. Provide Start Quick (approximately 10 prompts), Start Normal (approximately 20) and Due Review (due concepts only). Use constrained balanced ordering; preserve due priority and failed-retry deadlines. Initial-concept budgets include clean delayed recall, and corrections/closing recall can extend sessions. Keep progress separate per drill, derived from ordinary concept/review/attempt/mistake evidence.
+
+Keep IN / ON / AT available and add:
+
+1. Articles: a, an, the, no article (typed `-`); first mention/known reference, singular countable nouns, professions, general plurals/uncountables, unique things, superlatives, institutions and fixed expressions.
+2. Quantifiers: some, any, much, many, few, a few, little, a little; countability, positive/negative/questions and the positive/negative meaning difference of the small-quantity pairs.
+3. DO / MAKE / TAKE / HAVE: practical collocations including decisions, mistakes, progress, homework, research, your best, showers, breaks, responsibility, meetings, experience and problems.
+4. SAY / TELL / SPEAK / TALK: messages, person objects, that clauses, named languages, conversations and topics.
+5. SINCE / FOR / AGO: starting points, durations and completed past references in realistic tense contexts.
+6. Present Perfect vs Past Simple: experience, unfinished periods, specific finished times, recent events, already/yet/just and ever/never; produce the complete verb form.
+7. Past Simple vs Past Continuous: completed events, background, interruption, simultaneous actions and storytelling; produce the complete verb form.
+8. THIS / THAT / THESE / THOSE: singular/plural, near/far and conversational references.
+9. WHO / WHICH / THAT: practical defining clauses about people and things; accept valid grammatical alternatives.
+10. Common Prepositions: to, for, with and about with high-frequency phrases/verbs.
+11. Verb + Preposition Patterns: arrive in/at, depend on, listen to, wait for, ask for, belong to, deal with, agree with, apologize for, apply for and focus on in everyday, university and technical contexts.
+
+Use typed productive recall with realistic short authored sentences; do not default to multiple-choice. Aim for at least 30–50 variants per module where practical and avoid repetitive templates. Where multiple answers are natural, author accepted alternatives or constrain meaning with a short cue rather than pretending literal comparison judges arbitrary English.
+
+Every error follows first-error hint without the full answer, second-error correction, active reproduction, a varied retry after five other completed prompts, repeated delayed retry after further failure, closing recall and earlier spaced review. Failed concepts must appear in Mistakes / Weak Areas and all history must survive reload and backup/restore. A due-only pool must not silently add new items; see QUICK_REFLEX_DRILLS.md for the explicit small-pool spacing limit.
+
+Test module loading, evaluation, retries, balance, sizes, persistence, Weak Areas, mastery/scheduling and a browser journey through the hub, error, delayed recall, completion and reload. Run lint, all unit/integration tests, production build and relevant Playwright regression, fixing failures. Report implemented modules, variant counts, test results and limitations.
+
+
+---
+
+# Expanded drill content bank and anti-repetition (2026-10-18)
+
+Expand the Quick Reflex Drills content bank substantially and improve anti-repetition behavior.
+
+Goal:
+The learner should rarely encounter the exact same sentence twice in a short period. The system should reinforce the language pattern, not make the learner memorize individual prompt sentences.
+
+Do not add new drill modules in this task.
+
+CURRENT MODULES
+
+- IN / ON / AT
+- Articles
+- Quantifiers
+- DO / MAKE / TAKE / HAVE
+- SAY / TELL / SPEAK / TALK
+- SINCE / FOR / AGO
+- Present Perfect vs Past Simple
+- Past Simple vs Past Continuous
+- THIS / THAT / THESE / THOSE
+- WHO / WHICH / THAT
+- Common Prepositions
+- Verb + Preposition Patterns
+
+CONTENT SIZE
+
+Increase each module to approximately 100–150 high-quality prompt variants where practical.
+
+Target total:
+at least approximately 1,200 prompts across the drill system.
+
+Do not satisfy the count by creating near-duplicate sentence templates.
+
+PERSONALIZED CONTENT
+
+Bias examples toward situations relevant to the learner:
+
+- university and lectures
+- talking to teachers
+- assignments and deadlines
+- project work
+- engineering / mechatronics
+- laboratories
+- technical troubleshooting
+- manufacturing / production
+- measurements and testing
+- office / meetings
+- commuting
+- public transport
+- travel
+- hotels
+- restaurants / cafés
+- sports and training
+- everyday errands
+- household / practical situations
+- social conversation
+
+Also keep enough general everyday English so the learner is not over-specialized.
+
+DIFFICULTY DISTRIBUTION
+
+Aim approximately for:
+
+- 25–30% B1
+- 45–50% B2
+- 20–25% C1
+
+Do not make C1 examples artificially difficult by using obscure vocabulary.
+
+Advanced sentences should be harder because of natural grammar, collocations and context.
+
+CONTENT STYLE
+
+Create original sentences.
+
+Do not copy textbook examples or copyrighted exercise banks.
+
+The style may be inspired by good English coursebooks:
+clear, natural, context-rich and pedagogically useful.
+
+Prefer sentences a real person could plausibly say, hear or encounter.
+
+Examples of the desired style:
+
+"The sensor output started fluctuating after the motor warmed up."
+
+"I submitted the assignment yesterday, but I haven't received any feedback yet."
+
+"We need to rule out a wiring fault before replacing the controller."
+
+"She has worked on this project since the beginning of the semester."
+
+"I told the supervisor about the problem before the meeting started."
+
+Avoid generic artificial examples such as:
+
+"The man has a book."
+"The girl went to the shop."
+"John likes apples."
+
+unless they are genuinely useful for a beginner concept.
+
+VARIETY
+
+Vary:
+
+- sentence subject
+- tense
+- vocabulary
+- sentence length
+- grammatical structure
+- topic
+- formality
+- technical vs everyday context
+- positive / negative / question forms
+
+Do not create simple lexical substitutions of the same sentence.
+
+Bad:
+"I waited for the bus."
+"I waited for the train."
+"I waited for my friend."
+
+Better:
+"I waited for the bus for nearly half an hour."
+"We're still waiting for approval from the supervisor."
+"Can you wait for me outside the laboratory?"
+
+CONCEPT COVERAGE
+
+Ensure balanced representation of all target concepts.
+
+Examples:
+
+Articles:
+- a
+- an
+- the
+- no article
+
+Quantifiers:
+- some
+- any
+- much
+- many
+- few
+- a few
+- little
+- a little
+
+DO / MAKE / TAKE / HAVE:
+balance all four verbs across several collocation types.
+
+SAY / TELL / SPEAK / TALK:
+cover distinct usage patterns, not only direct substitutions.
+
+Present Perfect vs Past Simple:
+include:
+- finished past time
+- life experience
+- unfinished time
+- already / yet / just
+- ever / never
+- recent consequences
+- specific time references
+
+Past Simple vs Past Continuous:
+include:
+- interrupted actions
+- background descriptions
+- simultaneous actions
+- narrative sequences
+
+Verb + Preposition:
+include a broad practical set such as:
+- depend on
+- focus on
+- listen to
+- wait for
+- ask for
+- apply for
+- apologize for
+- deal with
+- agree with
+- belong to
+- arrive in
+- arrive at
+- refer to
+- result in
+- consist of
+- contribute to
+- participate in
+- suffer from
+- rely on
+
+TECHNICAL ENGLISH
+
+Use technical examples naturally where appropriate.
+
+Examples should include language relevant to:
+- control engineering
+- PLCs
+- sensors
+- actuators
+- mechanics
+- manufacturing
+- measurements
+- testing
+- troubleshooting
+
+Do not turn every drill into technical English.
+
+ANTI-REPETITION
+
+Improve prompt-selection logic.
+
+Track recently seen prompt IDs per drill.
+
+Deprioritize recently shown exact prompts.
+
+The learner should normally see a substantial number of other prompts before the same exact sentence appears again.
+
+Aim for at least 30 other prompts before exact repetition when the content pool allows it.
+
+Exceptions:
+- failed-item delayed retrieval
+- scheduled spaced review
+- very small due pools
+
+Even during delayed retrieval, prefer a different sentence variant testing the same concept rather than repeating the exact original sentence.
+
+PERSISTENCE
+
+Persist recent-prompt history in IndexedDB so closing/reopening the app does not immediately reset repetition avoidance.
+
+Keep history bounded so it does not grow indefinitely.
+
+CONTENT VALIDATION
+
+Add automated validation for authored drill content.
+
+Check:
+- duplicate IDs
+- exact duplicate prompts
+- near-identical duplicates where practical
+- missing accepted answers
+- malformed items
+- underrepresented target concepts
+- minimum prompt count per module
+
+TESTING
+
+Add/update tests for:
+- minimum content-bank size
+- concept balance
+- duplicate detection
+- recent-prompt avoidance
+- history persistence
+- failed concept retry with a different variant
+- fallback behavior with small due pools
+- existing scheduler and Weak Areas integration
+
+Run:
+- lint
+- full unit/integration test suite
+- production build
+- relevant Playwright tests
+
+Do not add AI, backend, cloud sync or new learning modes.
+
+At the end report:
+- prompt count per module
+- total prompt count
+- approximate CEFR distribution
+- topic/context distribution
+- duplicate validation results
+- anti-repetition behavior
+- tests and results
+- known limitations

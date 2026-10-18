@@ -111,7 +111,9 @@ export function WeakAreasPage() {
   const groupId = search.get('concept'),
     view = search.get('view');
   const [data, setData] = useState<Data>();
-  const [filter, setFilter] = useState<WeakFilter>('all');
+  const [filter, setFilter] = useState<WeakFilter>(
+    search.get('filter') === 'grammar' ? 'grammar' : 'all',
+  );
   const [references, setReferences] = useState<string[]>([]);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState('');

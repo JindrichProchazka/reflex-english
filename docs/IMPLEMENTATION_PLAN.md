@@ -1,5 +1,11 @@
 # Implementation plan
 
+## Quick Reflex Drills increment (2026-10-18)
+
+The authorized drill expansion is documented in [QUICK_REFLEX_DRILLS.md](QUICK_REFLEX_DRILLS.md). A bundled registry feeds the shared session planner/result writer, a `/drills` hub derives per-module progress, and optional session identity fields preserve resumption/backups. It adds eleven areas while retaining original IN / ON / AT IDs and all existing learning history. No separate engine, schema table, backend or sync is introduced.
+
+The subsequent [content-bank expansion](DRILL_CONTENT_BANK.md) supplies 1,363 explicitly authored prompts across the same twelve modules, editorial level/context tags, automated content validation and bounded per-drill recency stored transactionally in settings. Backups use data v4 while retaining old imports and vocabulary content baselines. The shared scheduler and correction/closing rules remain unchanged.
+
 ## Scope and repository findings
 
 The initial repository contained only README.md and Git metadata. The complete specification is in PRODUCT_SPEC.md. The current learning application is stabilized as version 1.0.0: IN / ON / AT, lesson Vocabulary, printable practice, JSON backups, Weak Areas and twenty lessons, with GitHub Pages workflow, confirmed PWA updates and iPhone/WebKit release checks. See VOCABULARY_ARCHITECTURE.md, PAPER_PRACTICE.md, WEAK_AREAS.md, BACKUP_FORMAT.md and RELEASE.md. Public publication still requires committing/pushing the local source and enabling the Pages Actions source; local verification is distinct from a completed remote deployment. Broader learning features remain separate milestones.

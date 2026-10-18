@@ -252,7 +252,7 @@ export function weaknessProgress(areas: WeakArea[]) {
       )!;
       const category =
         target.type === 'grammar'
-          ? 'Grammar / prepositions'
+          ? target.topic
           : error.lessonEvidence === 'production'
             ? 'Sentence production'
             : error.lessonEvidence === 'understanding'

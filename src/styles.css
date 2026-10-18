@@ -816,6 +816,28 @@ select {
   size: A4 portrait;
   margin: 16mm;
 }
+.drill-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+.drill-card {
+  min-width: 0;
+}
+.drill-progress {
+  margin: 1.25rem 0;
+}
+.drill-progress > div {
+  margin-bottom: 0.65rem;
+}
+.drill-progress dt {
+  font-size: 0.8rem;
+  color: #526660;
+}
+.drill-progress dd {
+  margin: 0.15rem 0 0;
+}
+
 @media print {
   html,
   body {

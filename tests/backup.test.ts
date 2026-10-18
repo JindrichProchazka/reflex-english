@@ -113,7 +113,7 @@ describe('versioned full learning backup', () => {
     await populate(db);
     const backup = await exportBackup(db, 7000);
     expect(backup.schemaVersion).toBe(1);
-    expect(backup.dataVersion).toBe(2);
+    expect(backup.dataVersion).toBe(4);
     expect(backup.appVersion).toBe('1.0.0');
     expect(backup.exportedAt).toBe(new Date(7000).toISOString());
     expect(Object.keys(backup.data).sort()).toEqual([...tableNames].sort());
@@ -123,7 +123,10 @@ describe('versioned full learning backup', () => {
       { id: 'study', title: 'My edited topic', domain: 'academic' },
     ]);
     expect(backup.data.worksheets).toHaveLength(2);
-    expect(backup.data.settings).toHaveLength(2);
+    expect(backup.data.settings).toHaveLength(3);
+    expect(
+      backup.data.settings.some((s) => s.key === 'drill-history:in-on-at'),
+    ).toBe(true);
     expect(
       backup.data.attempts.some(
         (a) => a.durationMs === 678 && a.answer === 'wrong',

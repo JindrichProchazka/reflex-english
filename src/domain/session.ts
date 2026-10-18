@@ -1,4 +1,16 @@
-import type { Concept, ReviewItem, Session, Task } from './models';
+import type {
+  Concept,
+  PromptHistory,
+  ReviewItem,
+  Session,
+  Task,
+} from './models';
+import {
+  historyFor,
+  PROMPT_COOLDOWN,
+  recentVariant,
+  rememberPrompt,
+} from './prompt-history';
 
 export const RETRIEVAL_GAP = 5;
 
@@ -47,6 +59,26 @@ function balancedTask(s: Session, tasks: Task[], content: Concept[]): Task {
     pool = pool.filter((t) => t.conceptId !== state.lastConceptId);
   }
   let groups = [...new Set(pool.map((t) => byId.get(t.conceptId)!.group))];
+  // Do not exhaust a minority target early and leave an avoidable long tail
+  // (e.g. seven perfect vs three past-simple concepts). Keep the existing
+  // balanced count preference, but first retain choices whose remaining tier
+  // can still fit into runs of at most two. Retries/due tiers are selected
+  // outside this function; impossible distributions keep their normal fallback.
+  const demand = new Map<string, number>();
+  for (const task of tasks) {
+    const group = byId.get(task.conceptId)!.group;
+    demand.set(group, (demand.get(group) ?? 0) + 1);
+  }
+  const feasible = groups.filter((chosen) =>
+    [...demand].every(([group, count]) => {
+      const remaining = count - (group === chosen ? 1 : 0);
+      const others = tasks.length - 1 - remaining;
+      const suffix =
+        group === chosen ? 1 + (last === chosen ? (repeated ? 2 : 1) : 0) : 0;
+      return remaining <= 2 * (others + 1) - suffix;
+    }),
+  );
+  if (feasible.length) groups = feasible;
   // Brief focused acquisition pairs, followed by varied contexts in mixed recall.
   const pair =
     s.acquisition &&
@@ -66,9 +98,18 @@ function balancedTask(s: Session, tasks: Task[], content: Concept[]): Task {
   // Oldest due item within a target, then least recently presented concept.
   // Seeded tie-breaking varies sessions while making every transition replayable.
   const scored = candidates.map((task) => ({ task, tie: nextRandom(s) }));
+  const exhausted = (task: Task) => {
+    const history = historyFor(s.promptHistory, task.conceptId);
+    if (!history) return 0;
+    const recent = new Set(history.recentIds.slice(-PROMPT_COOLDOWN));
+    return byId.get(task.conceptId)!.exercises.every((e) => recent.has(e.id))
+      ? 1
+      : 0;
+  };
   scored.sort(
     (a, b) =>
       (a.task.dueAt ?? Infinity) - (b.task.dueAt ?? Infinity) ||
+      exhausted(a.task) - exhausted(b.task) ||
       (state.lastPresented[a.task.conceptId] ?? -1) -
         (state.lastPresented[b.task.conceptId] ?? -1) ||
       a.tie - b.tie,
@@ -130,7 +171,11 @@ function selectNext(s: Session, content: Concept[]) {
   if (task) {
     const c = content.find((c) => c.id === task.conceptId)!;
     const count = s.seen[c.id] ?? 0;
-    s.exerciseId = c.exercises[count % c.exercises.length].id;
+    const history = historyFor(s.promptHistory, c.id);
+    s.exerciseId = history
+      ? recentVariant(c, history.recentIds, () => nextRandom(s)).id
+      : c.exercises[count % c.exercises.length].id;
+    rememberPrompt(s.promptHistory, c.id, s.exerciseId);
     s.seen[c.id] = count + 1;
     const state = s.ordering!;
     state.recentTargets = [...state.recentTargets, c.group].slice(-2);
@@ -147,6 +192,11 @@ export function startSession(
   reviews: ReviewItem[],
   initialIds?: string[],
   deferredIds?: string[],
+  options?: {
+    initialLimit?: number;
+    mixed?: boolean;
+    promptHistory?: PromptHistory;
+  },
 ): Session {
   const byId = new Map(reviews.map((r) => [r.conceptId, r]));
   const rank = (r?: ReviewItem) =>
@@ -165,7 +215,7 @@ export function startSession(
       .map((c) => ({
         conceptId: c.id,
         kind: 'initial',
-        readyAfter: deferredIds?.includes(c.id) ? RETRIEVAL_GAP : 0,
+        readyAfter: 0,
         priority: rank(byId.get(c.id)),
         dueAt: rank(byId.get(c.id)) === 0 ? byId.get(c.id)!.dueAt : undefined,
       })),
@@ -174,14 +224,30 @@ export function startSession(
     wrongCount: 0,
     processed: 0,
     failed: [],
-    acquisition: content.every(
-      (c) => !byId.get(c.id) || byId.get(c.id)!.status === 'new',
-    ),
+    acquisition:
+      !options?.mixed &&
+      content.every((c) => !byId.get(c.id) || byId.get(c.id)!.status === 'new'),
     seen: Object.fromEntries(
       content.map((c) => [c.id, byId.get(c.id)?.successes.length ?? 0]),
     ),
     feedback: 'none',
   };
+  if (options?.promptHistory && Object.keys(options.promptHistory).length)
+    s.promptHistory = structuredClone(options.promptHistory);
+  if (options?.initialLimit !== undefined) {
+    // Plan the budget using the SAME priority/balancing selector as delivery.
+    // This avoids taking a catalogue prefix or a purely random subset. Preview
+    // ordering/seen state is discarded so it cannot count as learner exposure.
+    const preview = structuredClone(s);
+    const selected = new Set<string>();
+    while (preview.queue.length && selected.size < options.initialLimit) {
+      selectNext(preview, content);
+      if (preview.current) selected.add(preview.current.conceptId);
+    }
+    s.queue = s.queue.filter((t) => selected.has(t.conceptId));
+  }
+  for (const task of s.queue)
+    if (deferredIds?.includes(task.conceptId)) task.readyAfter = RETRIEVAL_GAP;
   selectNext(s, content);
   return s;
 }

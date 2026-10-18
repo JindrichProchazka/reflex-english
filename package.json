@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
+    "validate:drills": "vitest run tests/drill-content.test.ts",
     "lint": "eslint .",
     "format": "prettier --write src tests *.ts *.json *.html",
     "test:e2e": "playwright test",

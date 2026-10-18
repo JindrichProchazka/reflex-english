@@ -1,10 +1,11 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HashRouter } from 'react-router-dom';
 import { afterEach, expect, it } from 'vitest';
 import App from '../src/App';
 import { db } from '../src/data/database';
-import { concepts } from '../src/content/prepositions';
+import { drillById } from '../src/content/drills';
+const concepts = drillById('in-on-at')!.concepts;
 
 afterEach(async () => {
   cleanup();
@@ -20,7 +21,12 @@ it('supports labelled typed input, hides the full answer on first failure and re
     </HashRouter>,
   );
   await user.click(
-    await screen.findByRole('button', { name: /start review/i }),
+    await screen.findByRole('link', { name: /Open Quick Reflex Drills/ }),
+  );
+  await user.click(
+    within(
+      await screen.findByRole('region', { name: 'IN / ON / AT' }),
+    ).getByRole('button', { name: 'Start Normal' }),
   );
   await user.type(await screen.findByLabelText('Missing preposition'), 'wrong');
   const prompt = screen.getByTestId('prompt').textContent;

@@ -1,10 +1,16 @@
 import { concepts } from '../content/prepositions';
+import { drillForConcept, drillById } from '../content/drills';
 import { LearningDatabase } from '../data/database';
 import { controlledEvaluator, phraseEvaluator } from '../domain/evaluation';
 import { newId } from '../domain/id';
 import type { Attempt, Session } from '../domain/models';
 import { persistLearningResult } from './results';
-import { startSession, submitToSession } from '../domain/session';
+import { submitToSession } from '../domain/session';
+import {
+  refreshPromptHistory,
+  savePromptHistory,
+  startTrackedSession,
+} from './prompt-history';
 
 export const sessionContent = (session: Session) => session.content ?? concepts;
 export function sessionExercise(session: Session) {
@@ -13,6 +19,23 @@ export function sessionExercise(session: Session) {
     .find((e) => e.id === session.exerciseId);
   if (!exercise) throw new Error('Exercise not found in this session.');
   return exercise;
+}
+export async function loadReviewSession(db: LearningDatabase, id: string) {
+  return db.transaction(
+    'rw',
+    [db.sessions, db.settings, db.attempts],
+    async () => {
+      const session = await db.sessions.get(id);
+      if (session?.current && !session.promptHistory) {
+        await refreshPromptHistory(db, session);
+        if (session.promptHistory) {
+          await savePromptHistory(db, session);
+          await db.sessions.put(session);
+        }
+      }
+      return session;
+    },
+  );
 }
 async function checkedSession(db: LearningDatabase, expected: Session) {
   const session = await db.sessions.get(expected.id);
@@ -72,22 +95,36 @@ export async function loadDashboard(db: LearningDatabase, now = Date.now()) {
     due: reviews.filter(
       (r) => r.dueAt <= now && (r.status !== 'new' || r.lastErrorSession),
     ).length,
-    active: sessions.find((s) => s.module !== 'vocabulary' && !s.completedAt),
+    active: sessions.find(
+      (s) => (!s.module || s.module === 'prepositions') && !s.completedAt,
+    ),
     completed: sessions.filter((s) => s.completedAt).length,
   };
 }
 export async function beginSession(db: LearningDatabase, now = Date.now()) {
-  return db.transaction('rw', db.sessions, db.reviews, async () => {
-    const active = (await db.sessions.toArray()).find(
-      (s) => s.module !== 'vocabulary' && !s.completedAt,
-    );
-    if (active) return active;
-    const reviews = await db.reviews.toArray();
-    const session = startSession(newId(), now, concepts, reviews);
-    session.module = 'prepositions';
-    await db.sessions.add(session);
-    return session;
-  });
+  return db.transaction(
+    'rw',
+    [db.sessions, db.reviews, db.settings, db.attempts],
+    async () => {
+      const active = (await db.sessions.toArray()).find(
+        (s) => (!s.module || s.module === 'prepositions') && !s.completedAt,
+      );
+      if (active) return active;
+      const reviews = await db.reviews.toArray();
+      const content = drillById('in-on-at')!.concepts;
+      const session = await startTrackedSession(
+        db,
+        newId(),
+        now,
+        content,
+        reviews,
+      );
+      session.module = 'prepositions';
+      session.content = content;
+      await db.sessions.add(session);
+      return session;
+    },
+  );
 }
 export async function recordAnswer(
   db: LearningDatabase,
@@ -100,13 +137,17 @@ export async function recordAnswer(
   if (!answer.trim()) throw new Error('Type an answer first.');
   return db.transaction(
     'rw',
-    db.sessions,
-    db.reviews,
-    db.attempts,
-    db.mistakes,
-    db.lessonProgress,
+    [
+      db.sessions,
+      db.reviews,
+      db.attempts,
+      db.mistakes,
+      db.lessonProgress,
+      db.settings,
+    ],
     async () => {
       const session = await checkedSession(db, expected);
+      await refreshPromptHistory(db, session);
       const exercise = sessionExercise(session);
       const selfAssessed =
         exercise.evaluation === 'self' && session.wrongCount < 2;
@@ -117,10 +158,10 @@ export async function recordAnswer(
         throw new Error('Submit and assess this response before continuing.');
       const correct = selfAssessed
         ? grade === 'correct'
-        : (exercise.entryId ? phraseEvaluator : controlledEvaluator).evaluate(
-            answer,
-            exercise.acceptedAnswers ?? [exercise.answer],
-          );
+        : (exercise.entryId || exercise.conceptId.startsWith('drill:')
+            ? phraseEvaluator
+            : controlledEvaluator
+          ).evaluate(answer, exercise.acceptedAnswers ?? [exercise.answer]);
       const attempt: Attempt = {
         id: newId(),
         sessionId: session.id,
@@ -172,15 +213,17 @@ export async function recordAnswer(
         db,
         attempt,
         exercise,
-        concepts.some((c) => c.id === exercise.conceptId)
-          ? 'preposition'
-          : session.module === 'vocabulary'
-            ? exercise.stage === 'collocation'
-              ? 'collocation'
-              : 'vocabulary'
-            : 'preposition',
+        drillForConcept(exercise.conceptId)?.category ??
+          (concepts.some((c) => c.id === exercise.conceptId)
+            ? 'preposition'
+            : session.module === 'vocabulary'
+              ? exercise.stage === 'collocation'
+                ? 'collocation'
+                : 'vocabulary'
+              : 'preposition'),
       );
       await db.sessions.put(next);
+      await savePromptHistory(db, next);
       return { session: next, correct };
     },
   );

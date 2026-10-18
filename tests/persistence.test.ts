@@ -3,9 +3,9 @@ import {
   beginSession,
   loadDashboard,
   recordAnswer,
+  sessionExercise,
 } from '../src/application/learning';
 import { LearningDatabase } from '../src/data/database';
-import { exerciseById } from '../src/content/prepositions';
 
 const databases: LearningDatabase[] = [];
 function database(name: string = crypto.randomUUID()) {
@@ -44,7 +44,7 @@ describe('IndexedDB learning transactions', () => {
     const corrected = await recordAnswer(
       reopened,
       data.active!,
-      exerciseById(s.exerciseId).answer,
+      sessionExercise(s).answer,
       777,
       1400,
     );

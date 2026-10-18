@@ -22,6 +22,8 @@ export interface Exercise {
   entryId?: string;
   instruction?: string;
   lessonId?: string;
+  level?: 'B1' | 'B2' | 'C1';
+  topic?: string;
 }
 export interface Concept {
   id: string;
@@ -73,7 +75,9 @@ export interface Session {
   seen: Record<string, number>;
   feedback: 'none' | 'hint' | 'correction';
   acquisition?: boolean;
-  module?: 'prepositions' | 'vocabulary';
+  module?: 'prepositions' | 'vocabulary' | 'drill';
+  drillId?: string;
+  drillSize?: 'quick' | 'normal' | 'due';
   lessonId?: string;
   studyMode?: StudyMode;
   testDirection?: RecallDirection;
@@ -81,6 +85,7 @@ export interface Session {
   worksheetId?: string;
   weakAreaIds?: string[];
   content?: Concept[];
+  promptHistory?: PromptHistory;
   assessment?: {
     answer: string;
     durationMs: number;
@@ -95,6 +100,10 @@ export interface Session {
     lastConceptId?: string;
   };
 }
+export type PromptHistory = Record<
+  string,
+  { conceptIds: string[]; recentIds: string[] }
+>;
 export interface Attempt {
   id: string;
   sessionId: string;
@@ -129,7 +138,14 @@ export interface Attempt {
 }
 export interface Mistake {
   conceptId: string;
-  category: 'preposition' | 'vocabulary' | 'collocation' | 'phrase';
+  category:
+    | 'preposition'
+    | 'vocabulary'
+    | 'collocation'
+    | 'phrase'
+    | 'article'
+    | 'tense'
+    | 'grammar';
   occurrences: number;
   attemptIds: string[];
   dates: number[];

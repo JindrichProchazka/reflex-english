@@ -1,10 +1,10 @@
 import type { LearningDatabase } from '../data/database';
-import { concepts as grammar } from '../content/prepositions';
+import { grammarConcepts, drillForConcept, drillById } from '../content/drills';
 import { seedStudyLessons } from './study';
 import { lessonContent, recallConcept } from '../domain/study';
 import { newId } from '../domain/id';
 import { newReview } from '../domain/scheduler';
-import { startSession } from '../domain/session';
+import { startTrackedSession } from './prompt-history';
 import {
   buildWeakAreas,
   needsPractice,
@@ -25,13 +25,13 @@ async function readWeakness(db: LearningDatabase, now: number) {
       db.sessions.toArray(),
     ]);
   const catalog = new Map<string, WeakTarget>();
-  for (const concept of grammar)
+  for (const concept of grammarConcepts)
     catalog.set(concept.id, {
       concept,
       groupId: `grammar:${concept.id}`,
       title: concept.title,
       type: 'grammar',
-      topic: 'IN / ON / AT',
+      topic: drillForConcept(concept.id)!.title,
     });
   for (const lesson of lessons)
     for (const mode of ['recall', 'context'] as const) {
@@ -215,6 +215,7 @@ export async function beginWeakSession(
       db.mistakes,
       db.reviews,
       db.sessions,
+      db.settings,
     ],
     async () => {
       const data = await readWeakness(db, now);
@@ -261,14 +262,15 @@ export async function beginWeakSession(
       const deferred = targetIds.filter(exposed);
       // Retain varied grammar fillers even for a single failed word, so delayed
       // retries/closing recall can use five OTHER prompts in the shared engine.
-      const filler = grammar
-        .filter((c) => !targetIds.includes(c.id))
+      const filler = drillById('in-on-at')!
+        .concepts.filter((c) => !targetIds.includes(c.id))
         .slice(0, 5);
       const content = [...targets.map((t) => t.concept), ...filler];
       for (const target of targets)
         if (!data.reviews.some((r) => r.conceptId === target.concept.id))
           await db.reviews.put(newReview(target.concept.id, now));
-      const session = startSession(
+      const session = await startTrackedSession(
+        db,
         newId(),
         now,
         content,
@@ -294,5 +296,5 @@ export function mistakeCategory(attempt: Attempt) {
       : attempt.lessonEvidence === 'understanding'
         ? 'Context / collocation'
         : 'Vocabulary recall'
-    : 'Grammar / preposition';
+    : `Grammar / ${drillForConcept(attempt.conceptId)?.category ?? 'preposition'}`;
 }

@@ -1,9 +1,10 @@
-import { concepts as grammarContent } from '../content/prepositions';
+import { drillById } from '../content/drills';
 import { initialStudyLessons, studyLessons } from '../content/study-lessons';
 import type { LearningDatabase } from '../data/database';
 import { newId } from '../domain/id';
 import { newReview } from '../domain/scheduler';
 import { startSession } from '../domain/session';
+import { startTrackedSession } from './prompt-history';
 import { lessonContent, recallConcept } from '../domain/study';
 import type {
   LessonWord,
@@ -144,6 +145,8 @@ export async function beginPersonalSession(
     db.vocabulary,
     db.sessions,
     db.reviews,
+    db.settings,
+    db.attempts,
     async () => {
       const active = (await db.sessions.toArray()).find(
         (s) =>
@@ -191,7 +194,9 @@ export async function beginPersonalSession(
       const ids = selectedId
         ? [`vocab:${selectedId}`]
         : ordered.slice(0, 12).map((c) => c.id);
-      const s = startSession(
+      const grammarContent = drillById('in-on-at')!.concepts;
+      const s = await startTrackedSession(
+        db,
         newId(),
         now,
         [...content, ...grammarContent],

@@ -183,6 +183,11 @@ export function validateBackup(input: unknown): Backup {
       invalid('incomplete submitted worksheet');
   }
   for (const session of data.sessions) {
+    if (
+      session.module === 'drill' &&
+      (!session.drillId || !session.drillSize || !session.content?.length)
+    )
+      invalid('drill session identity/content');
     const content = session.content ?? concepts;
     unique(
       content.map((c) => c.id),

@@ -1,5 +1,5 @@
 import type { LearningDatabase } from '../data/database';
-import { concepts as grammarConcepts } from '../content/prepositions';
+import { grammarConcepts, drillForConcept } from '../content/drills';
 import { newId } from '../domain/id';
 import { generateWorksheet, lessonWorksheetPool } from '../domain/worksheets';
 import type {
@@ -11,7 +11,7 @@ import { recallConcept, lessonContent } from '../domain/study';
 import { seedStudyLessons } from './study';
 import { persistLearningResult } from './results';
 import type { Attempt, Concept, Exercise } from '../domain/models';
-import { startSession } from '../domain/session';
+import { startTrackedSession } from './prompt-history';
 import { newReview } from '../domain/scheduler';
 
 export async function createWorksheet(
@@ -58,7 +58,7 @@ export async function createWorksheet(
           id: `grammar:${e.id}`,
           kind: 'gap' as const,
           exercise: e,
-          category: 'preposition' as const,
+          category: drillForConcept(c.id)!.category,
         })),
       ),
     );
@@ -309,10 +309,14 @@ export async function beginWorksheetReview(
 ) {
   return db.transaction(
     'rw',
-    db.worksheets,
-    db.sessions,
-    db.reviews,
-    db.studyLessons,
+    [
+      db.worksheets,
+      db.sessions,
+      db.reviews,
+      db.studyLessons,
+      db.settings,
+      db.attempts,
+    ],
     async () => {
       const active = (await db.sessions.toArray()).find(
         (s) => s.worksheetId === id && !s.completedAt,
@@ -370,7 +374,8 @@ export async function beginWorksheetReview(
         .slice(0, 5);
       for (const concept of filler)
         if (!content.some((c) => c.id === concept.id)) content.push(concept);
-      const s = startSession(
+      const s = await startTrackedSession(
+        db,
         newId(),
         now,
         content,

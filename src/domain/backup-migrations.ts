@@ -1,5 +1,5 @@
 export const BACKUP_SCHEMA_VERSION = 1;
-export const DATA_VERSION = 2;
+export const DATA_VERSION = 4;
 
 // Each future migration must return a new document without touching IndexedDB.
 // Do not treat an unversioned/foreign JSON file as an older Reflex backup.
@@ -31,5 +31,11 @@ export function migrateBackup(input: unknown): unknown {
   // Data v2 adds optional unseen contexts, advanced CEFR labels and focused
   // session IDs. Existing rows require no rewriting; retain old content refs.
   if (document.dataVersion === 1) document = { ...document, dataVersion: 2 };
+  // Data v3 adds optional drill-session identity and grammar mistake categories.
+  // Bundled vocabulary baselines and all historical rows stay unchanged.
+  if (document.dataVersion === 2) document = { ...document, dataVersion: 3 };
+  // Data v4 adds optional prompt recency snapshots and editorial drill metadata.
+  // Bounded per-drill history lives in the already backed-up settings table.
+  if (document.dataVersion === 3) document = { ...document, dataVersion: 4 };
   return document;
 }

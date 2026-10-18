@@ -1,6 +1,6 @@
 # Reflex English
 
-A local-first English practice notebook for a Czech speaker working toward practical B2/C1. V1 (`1.0.0`) includes IN / ON / AT, twenty vocabulary lessons, delayed retrieval, Weak Areas, printable practice and JSON backups. It runs as a static GitHub Pages PWA with no account, backend or cloud synchronization.
+A local-first English practice notebook for a Czech speaker working toward practical B2/C1. V1 (`1.0.0`) includes Quick Reflex Drills, twenty vocabulary lessons, delayed retrieval, Weak Areas, printable practice and JSON backups. It runs as a static GitHub Pages PWA with no account, backend or cloud synchronization.
 
 Production URL: **https://JindrichProchazka.github.io/reflex-english/**
 
@@ -19,14 +19,15 @@ In the Codex environment used to implement this slice, npm was absent from PATH.
 
 ## Practice
 
-Start a review from home. There are 12 concepts and 36 sentence variants: clock times, meeting points, school/work, addresses, months/years, parts of the day, cities/countries, interiors/cars/taxis, days/dates, specific mornings/evenings, public transport and surfaces.
+From Home, open **Quick Reflex Drills**, choose an area, then Start Quick, Start Normal or Due Review. The hub includes the original IN / ON / AT drill and eleven other areas, with **142 concepts and 1,363 authored sentence variants**. Cards show mastery counts, due concepts, first-attempt accuracy and recent mistakes. All modules share the existing correction, scheduling, Weak Areas, backup and offline systems. See [Quick Reflex Drills](docs/QUICK_REFLEX_DRILLS.md) and the [expanded content bank](docs/DRILL_CONTENT_BANK.md) for counts, contexts and session rules.
 
-New content begins in short focused pairs. Mixed review uses seeded constrained ordering: balance IN / ON / AT, avoid more than two identical targets and adjacent variants of one concept when alternatives exist. Due items stay ahead of optional/new practice; ready failed-item retries override cosmetic constraints. Seed and ordering state are saved with the session so reload does not reshuffle it. An optional short guide is available on home. All responses are typed; evaluation accepts only the intended preposition, ignoring Unicode width, capitalization and surrounding whitespace.
+New content begins in short focused pairs. Mixed review uses seeded constrained ordering: balance targets, avoid more than two identical targets and adjacent variants of one concept when alternatives exist. Due items stay ahead of optional/new practice; ready failed-item retries override cosmetic constraints. Seed and ordering state are saved with the session so reload does not reshuffle it. An optional IN / ON / AT guide is available on Home. Responses are typed; the new drills accept authored grammatical alternatives, normalizing case, whitespace, apostrophes and final punctuation. Type `-` for no article. Controlled checking cannot grade arbitrary free English.
 
 - First error: a targeted hint, without the correct answer.
 - Second error: the answer and explanation; the learner must type it again.
 - After resolving an error, the concept returns after five intervening prompts and again in closing recall. An error on a retry repeats this loop. If a late error leaves too few prompts, alternate concepts provide the spacing.
-- Even initially correct concepts get a delayed same-session recall. A clean session has approximately 24 prompts; mistakes can extend it. Leaving saves the current place after the last submitted answer.
+- Even initially correct concepts get a delayed same-session recall. Quick starts with five concepts (about 10–11 prompts), Normal with ten (about 20). Errors, reference exposure and closing recall can extend sessions. Due Review uses only previously practised due concepts and needs six distinct due concepts to guarantee five intervening prompts; use Quick for a smaller due pool. Leaving saves the current place after the last submitted answer. Legacy IN / ON / AT sessions remain resumable with their original size/order.
+- The shared selector prefers a different sentence outside the last 30 prompts, with bounded per-drill history saved in IndexedDB before each new presentation. History survives page closure and backup/restore. Due priority and failed retries can override the cooldown; small/legacy pools use the least-recent different variant. Reopening an unfinished session resumes its existing question.
 - Corrections return in 10 minutes. Clean spaced successes progress through 1, 3, 7, 14, 30 and 60 days. The same session cannot advance an interval twice; rapid restarts within 24 hours do not manufacture spaced evidence. A failure resets the interval progression and blocks strong credit for that session. Hint-assisted recall is weaker and never earns clean mastery evidence.
 - First successful recall starts learning. Distinct spaced sessions permit reviewing. Mastery needs four clean spaced successes spanning seven days, three recent error-free reviews and varied productive contexts. A mastered error demotes to reviewing. Mastered concepts still return.
 
@@ -130,7 +131,7 @@ Open **Data / Backup** in the header to export all user data as a readable JSON 
 
 To restore, choose **Import backup**, inspect the contents and export date, then explicitly choose **Replace current local learning data** or **Cancel**. Replacement removes current local data rather than merging. Validation and version checks happen before any changes. A single IndexedDB transaction captures a safety copy, clears/writes all tables and verifies the stored rows before committing. Failure rolls back the entire replacement. Download the before-restore safety backup before leaving this page or reloading: it exists only in memory. Other open app tabs refresh their data view after a successful restore.
 
-Current exports use `schemaVersion: 1`, `dataVersion: 2` and built-in content version 2, with an app version and export timestamp. Original data/content-v1 backups are still accepted and retain their original baseline. Migrations are separate from UI code. Newer/unsupported formats are rejected. See [Backup format](docs/BACKUP_FORMAT.md). The import UI accepts files up to 50 MB; processing is in memory. Files are plain JSON, not encrypted. There is no cloud copy, account or synchronization: keep exported files outside browser storage.
+Current exports use `schemaVersion: 1`, `dataVersion: 4` and vocabulary built-in content version 2, with an app version and export timestamp. Original data-v1/v2/v3 backups are still accepted and retain their original baseline. Drill sessions include content/recency snapshots and bounded prompt history in settings; progress uses the existing review/attempt/mistake tables. Migrations are separate from UI code. Newer/unsupported formats are rejected. See [Backup format](docs/BACKUP_FORMAT.md). The import UI accepts files up to 50 MB; processing is in memory. Files are plain JSON, not encrypted. There is no cloud copy, account or synchronization: keep exported files outside browser storage.
 
 Additional grammar topics, fuller scenario flows, voice and AI evaluation remain later milestones.
 

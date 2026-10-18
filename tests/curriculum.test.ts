@@ -155,7 +155,7 @@ it('restores a genuine data-v1/content-v1 backup, then adds the new curriculum w
   backup.dataVersion = 1;
   backup.builtInContent.version = 1;
   const parsed = parseBackup(JSON.stringify(backup));
-  expect(parsed.dataVersion).toBe(2);
+  expect(parsed.dataVersion).toBe(4);
   expect(materializeBackup(parsed).studyLessons).toHaveLength(10);
   const restored = database();
   await restoreBackup(restored, parsed, {
@@ -189,7 +189,7 @@ it('retains separate recall/context progress through a full new lesson, backup a
     await beginLessonSession(db, 'measurement', 'context', 'mixed', now),
   );
   const backup = await exportBackup(db);
-  expect(backup.dataVersion).toBe(2);
+  expect(backup.dataVersion).toBe(4);
   expect(backup.builtInContent.version).toBe(2);
   const restored = database();
   await restoreBackup(restored, backup, {

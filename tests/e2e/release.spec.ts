@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { PRODUCTION_BASE } from '../../src/config';
-import { concepts } from '../../src/content/prepositions';
+import { drillById } from '../../src/content/drills';
+const concepts = drillById('in-on-at')!.concepts;
 import { releaseServer } from './release-server';
 async function waitForOffline(page: Page) {
   await page.evaluate(async () => {
@@ -241,8 +242,10 @@ test('a real waiting service worker updates only after confirmation and preserve
       '1',
     );
     await page.goto(`${server.url}#/`);
+    await page.getByRole('link', { name: /Open Quick Reflex Drills/ }).click();
     await page
-      .getByRole('button', { name: 'Start review', exact: false })
+      .getByRole('region', { name: 'IN / ON / AT', exact: true })
+      .getByRole('button', { name: 'Start Normal' })
       .click();
     const prompt = await page.getByTestId('prompt').innerText();
     const exercise = concepts
@@ -298,8 +301,10 @@ test('a real waiting service worker updates only after confirmation and preserve
       page.getByRole('region', { name: 'Current local data' }),
     ).toContainText('Attempts: 1');
     await page.goto(`${server.url}#/`);
+    await page.getByRole('link', { name: /Open Quick Reflex Drills/ }).click();
     await page
-      .getByRole('button', { name: 'Continue review', exact: false })
+      .getByRole('region', { name: 'IN / ON / AT', exact: true })
+      .getByRole('button', { name: 'Continue Normal' })
       .click();
     await expect(page.getByTestId('prompt')).toHaveText(nextPrompt);
     await page.goto(`${server.url}#/vocabulary`);
