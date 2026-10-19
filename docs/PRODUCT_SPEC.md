@@ -2329,3 +2329,1182 @@ At the end report:
 - anti-repetition behavior
 - tests and results
 - known limitations
+
+# Learning UX refinements (2026-10-19)
+
+The following real-use feedback supersedes earlier typed-only rules for bounded Quick Reflex Drills. Vocabulary and verb/sentence production remain typed.
+
+Improve several existing learning UX issues based on real user testing.
+
+Do not change the underlying scheduler, mastery rules, delayed retry logic or persistence unless necessary for these fixes.
+
+PART 1 — SESSION COMPLETION SUMMARY
+
+The current completion screen exposes too much low-value scheduler detail and contains unreadable rows such as:
+
+Vocabulary recalllearning19. 10. 2026 12:40
+
+Redesign the completion summary to be concise and learner-focused.
+
+Show prominently:
+
+- first-attempt accuracy
+- total attempts
+- number of concepts that required revisiting
+- number of concepts completed cleanly
+
+Add a section:
+
+Needs more practice
+
+Show the actual vocabulary/concept names that caused difficulty, for example:
+
+reservation — review tomorrow
+available — review tomorrow
+check-in — review in 2 days
+
+Use human-readable relative scheduling labels where practical:
+
+today
+tomorrow
+in 2 days
+in 1 week
+
+Do not show exact timestamps on the main completion screen.
+
+Limit the main weak-items list to approximately 5 items.
+
+Provide an optional:
+
+View all scheduled reviews
+
+for detailed scheduling information.
+
+If no concepts caused problems, show a compact positive state instead of an empty weakness list.
+
+Keep the main actions:
+
+- Back to home
+- Continue to Use in Context
+- Review mistakes, when relevant
+
+Keep the page compact and mobile-friendly.
+
+PART 2 — FIX USE IN CONTEXT GAP-FILL EVALUATION
+
+Current problem:
+
+A context exercise can show:
+
+Meaning: snídaně v ceně
+
+"We would like ___ in our booking."
+
+The learner naturally types:
+
+breakfast included
+
+This is the correct missing phrase.
+
+However, the current evaluator expects the complete sentence:
+
+"We would like breakfast included in our booking."
+
+This creates false mistakes.
+
+Fix the exercise model and evaluation.
+
+For GAP-FILL exercises:
+
+- accept the missing phrase as the primary answer
+- also accept the complete sentence if the learner types it
+- normalize capitalization
+- normalize harmless punctuation differences
+- normalize extra surrounding/internal whitespace
+- preserve authored accepted variants where defined
+
+Example:
+
+Frame:
+"We would like ___ in our booking."
+
+Accept:
+breakfast included
+
+Also accept:
+We would like breakfast included in our booking.
+
+Do not accept unrelated answers.
+
+The UI instruction must clearly tell the learner what to type.
+
+For gap-fill:
+"Type the missing word or phrase."
+
+Do NOT say:
+"Type the whole sentence."
+
+FULL-SENTENCE PRODUCTION
+
+Keep full-sentence production as a separate exercise type.
+
+When the exercise genuinely tests sentence production, clearly show:
+
+"Type the whole sentence."
+
+In that exercise type, require the complete sentence.
+
+Do not mix gap-fill and full-sentence-production semantics.
+
+PART 3 — BUTTON INPUT FOR CLOSED-CHOICE REFLEX DRILLS
+
+For Quick Reflex Drills where the valid answer set is small and fixed, replace the text input with large tap-friendly answer buttons.
+
+The purpose is speed and automaticity on mobile.
+
+Examples:
+
+IN / ON / AT
+Buttons:
+[ IN ] [ ON ] [ AT ]
+
+Articles:
+[ A ] [ AN ] [ THE ] [ — ]
+
+DO / MAKE / TAKE / HAVE
+[ DO ] [ MAKE ] [ TAKE ] [ HAVE ]
+
+SAY / TELL / SPEAK / TALK
+[ SAY ] [ TELL ] [ SPEAK ] [ TALK ]
+
+SINCE / FOR / AGO
+[ SINCE ] [ FOR ] [ AGO ]
+
+THIS / THAT / THESE / THOSE
+[ THIS ] [ THAT ] [ THESE ] [ THOSE ]
+
+WHO / WHICH / THAT
+[ WHO ] [ WHICH ] [ THAT ]
+
+Use buttons for any other existing drill where the answer set is similarly small and explicitly defined.
+
+Do NOT use buttons where the learner needs to produce:
+
+- a full verb form
+- a sentence
+- a phrase
+- an open vocabulary answer
+- a complex answer with many possible forms
+
+Those exercises should keep typed input.
+
+For drills such as:
+
+Present Perfect vs Past Simple
+Past Simple vs Past Continuous
+
+use judgement.
+
+If the current task asks only to choose the tense category, buttons may be appropriate.
+
+If the task requires producing the actual verb form, keep typed input.
+
+COMMON PREPOSITIONS / VERB + PREPOSITION
+
+If a drill has a practical fixed answer set for the current item, buttons may be used.
+
+Do not show dozens of buttons.
+
+If the answer space is too broad, retain typed input.
+
+BUTTON UX
+
+Buttons must be:
+
+- large enough for comfortable iPhone use
+- horizontally arranged where space allows
+- wrapped cleanly on small screens
+- keyboard accessible
+- visually clear
+- easy to tap quickly
+- not gamified
+
+When an answer button is tapped:
+
+- submit immediately
+- show existing feedback
+- preserve existing first-error hint behavior
+- preserve correction behavior
+- preserve delayed retry
+- preserve closing recall
+- preserve mistake tracking
+- preserve scheduler/mastery logic
+
+The learner should not need an extra Submit button after tapping an answer.
+
+After feedback, make moving to the next prompt quick and obvious.
+
+Do not accidentally allow double submission from rapid taps.
+
+ACCESSIBILITY
+
+Buttons must have accessible labels and visible focus states.
+
+Keyboard users should still be able to answer.
+
+TESTING
+
+Add regression tests for:
+
+Session summary:
+- weak concept names shown
+- exact scheduler timestamps hidden from compact summary
+- relative review labels
+- clean session state
+- scheduled-review details still accessible
+
+Gap-fill:
+- missing phrase accepted
+- full sentence accepted
+- capitalization/whitespace normalization
+- incorrect phrase rejected
+- full-sentence production still requires the full sentence
+
+Button drills:
+- correct button submits successfully
+- wrong button enters the existing correction loop
+- delayed retry still works
+- no duplicate submission on rapid click/tap
+- keyboard accessibility
+- mobile layouts at existing iPhone widths
+- typed-input drills remain typed
+
+Run:
+
+- lint
+- full unit/integration test suite
+- production build
+- relevant desktop/mobile Playwright tests
+
+Fix failures before finishing.
+
+Do not add new learning modules, AI, backend, cloud sync or gamification.
+
+At the end report:
+
+- which drills now use buttons
+- which drills remain typed and why
+- how gap-fill/full-sentence exercise types are distinguished
+- how the completion summary changed
+- tests and results
+- known limitations
+
+# Daily-use UX and 2,560-prompt bank refinement (2026-10-19)
+
+This later instruction supersedes the previous 100–150/module, 30-prompt-gap and topic/difficulty targets. Existing IDs, snapshots and data remain preserved.
+
+Implement the following UX fixes and a major expansion/refinement of the authored Quick Reflex Drill content.
+
+This task is based on real daily usage of the deployed application.
+
+Do NOT add new learning modes, AI, backend, accounts or gamification.
+
+Preserve all existing:
+- learning history
+- scheduler data
+- mastery states
+- mistakes
+- IndexedDB migrations
+- backups
+- lesson progress
+- current drill progress
+
+The current learning engine is fundamentally working well. This task improves input UX, feedback UX and content quality.
+
+==================================================
+PART 1 — SESSION COMPLETION SUMMARY
+==================================================
+
+The current completion screen exposes too much low-value scheduler information and displays unreadable rows such as:
+
+Vocabulary recalllearning19. 10. 2026 12:40
+
+Replace this with a compact learner-focused summary.
+
+Show prominently:
+
+- first-attempt accuracy
+- total attempts
+- number of concepts that required revisiting
+- number of concepts completed cleanly
+
+Add:
+
+NEEDS MORE PRACTICE
+
+Show the actual vocabulary word, phrase or grammar concept that caused difficulty.
+
+Example:
+
+reservation — review tomorrow
+available — review tomorrow
+check-in — review in 2 days
+arrive in / at — review in 3 days
+
+Use human-readable dates:
+
+today
+tomorrow
+in 2 days
+in 1 week
+
+Do not show exact timestamps on the main summary.
+
+Show at most approximately five important weak items.
+
+Provide:
+
+View all scheduled reviews
+
+for detailed information if desired.
+
+If no concept caused difficulty, show a compact clean-session message.
+
+Keep relevant actions:
+
+Back to home
+Continue to Use in Context
+Review mistakes
+
+Do not change scheduler or mastery behaviour.
+
+==================================================
+PART 2 — FIX GAP-FILL ANSWER EVALUATION
+==================================================
+
+A real user encountered this problem:
+
+Prompt:
+
+Meaning: snídaně v ceně
+
+We would like ___ in our booking.
+
+The learner entered:
+
+breakfast included
+
+This is correct.
+
+The current application rejected it because it expected:
+
+We would like breakfast included in our booking.
+
+This is incorrect UX.
+
+Create a clear distinction between two exercise types.
+
+A) GAP FILL
+
+Instruction:
+
+Type the missing word or phrase.
+
+Example:
+
+We would like ___ in our booking.
+
+Accept:
+
+breakfast included
+
+Also accept:
+
+We would like breakfast included in our booking.
+
+Normalize:
+
+- capitalization
+- trailing punctuation
+- leading/trailing whitespace
+- harmless repeated whitespace
+
+Continue supporting explicitly authored accepted variants.
+
+B) FULL SENTENCE PRODUCTION
+
+Instruction:
+
+Type the whole sentence.
+
+This exercise should actually require the full sentence.
+
+Do not confuse these two modes in either the UI or evaluator.
+
+Do not create false mistakes because the learner correctly filled the visible gap.
+
+==================================================
+PART 3 — FAST BUTTON INPUT FOR CLOSED-SET DRILLS
+==================================================
+
+The learner mainly uses Quick Reflex Drills to build automaticity.
+
+Typing "in", "on", "at", etc. repeatedly adds unnecessary friction.
+
+For drills with a SMALL FIXED ANSWER SET, replace the text box with large tap-friendly buttons.
+
+Tapping a button must immediately submit the answer.
+
+No additional Submit button.
+
+Use buttons for:
+
+IN / ON / AT
+[ IN ] [ ON ] [ AT ]
+
+Articles
+[ A ] [ AN ] [ THE ] [ — ]
+
+Quantifiers
+[ SOME ] [ ANY ] [ MUCH ] [ MANY ]
+[ FEW ] [ A FEW ] [ LITTLE ] [ A LITTLE ]
+
+DO / MAKE / TAKE / HAVE
+[ DO ] [ MAKE ] [ TAKE ] [ HAVE ]
+
+SAY / TELL / SPEAK / TALK
+[ SAY ] [ TELL ] [ SPEAK ] [ TALK ]
+
+SINCE / FOR / AGO
+[ SINCE ] [ FOR ] [ AGO ]
+
+THIS / THAT / THESE / THOSE
+[ THIS ] [ THAT ] [ THESE ] [ THOSE ]
+
+WHO / WHICH / THAT
+[ WHO ] [ WHICH ] [ THAT ]
+
+For Common Prepositions, use buttons only where the answer pool for that drill remains small enough to be usable on mobile.
+
+For Verb + Preposition Patterns, keep typed input when the answer space is broad.
+
+For tense drills:
+
+Present Perfect vs Past Simple
+Past Simple vs Past Continuous
+
+If the learner is selecting ONLY a tense category, buttons may be used.
+
+If the learner must produce the actual verb form, retain typed input.
+
+For vocabulary, phrases, translations and sentence production:
+retain typed input.
+
+BUTTON UX
+
+Buttons must:
+
+- be comfortable on iPhone
+- use large touch targets
+- wrap cleanly
+- have clear selected/feedback states
+- be keyboard accessible
+- prevent accidental double submission
+- immediately use the existing correction system
+
+Do not change:
+
+- first-error hints
+- second-error correction
+- active reproduction
+- five-prompt delayed retry
+- closing recall
+- scheduling
+- mastery
+- Weak Areas integration
+
+==================================================
+PART 4 — MAJOR QUICK DRILL CONTENT EXPANSION
+==================================================
+
+The current bank contains approximately 1,363 authored prompts.
+
+Increase the bank to approximately 2,560 high-quality prompts.
+
+Target counts:
+
+IN / ON / AT:
+220
+
+Articles:
+260
+
+Quantifiers:
+220
+
+DO / MAKE / TAKE / HAVE:
+220
+
+SAY / TELL / SPEAK / TALK:
+200
+
+SINCE / FOR / AGO:
+180
+
+Present Perfect vs Past Simple:
+220
+
+Past Simple vs Past Continuous:
+200
+
+THIS / THAT / THESE / THOSE:
+160
+
+WHO / WHICH / THAT:
+160
+
+Common Prepositions:
+240
+
+Verb + Preposition Patterns:
+280
+
+TARGET TOTAL:
+approximately 2,560 prompts.
+
+Counts may vary slightly if necessary for genuine content quality.
+
+Do NOT reach the target by producing artificial near-duplicates.
+
+==================================================
+PART 5 — CONTEXT DISTRIBUTION
+==================================================
+
+Do not decide the topic distribution yourself.
+
+Use approximately this distribution across the complete drill bank:
+
+18% — University / studying
+22% — Engineering / mechatronics / laboratories
+15% — Workplace / manufacturing / project work
+12% — Travel / commuting / administration
+18% — Everyday practical life / home / errands / social situations
+8% — Sport / training / hobbies
+7% — Advanced professional / abstract discussion
+
+The bank must still feel like general English, not a mechatronics textbook.
+
+However, the learner should frequently encounter situations that resemble his actual life.
+
+USE CONTEXTS SUCH AS:
+
+UNIVERSITY
+
+- arriving late for a lecture
+- explaining an assignment
+- asking a teacher for clarification
+- misunderstanding instructions
+- submitting coursework
+- discussing deadlines
+- asking when an exam takes place
+- arranging a project meeting
+- speaking during a laboratory class
+- presenting results
+- disagreeing politely with a lecturer
+- study department administration
+- timetable problems
+- Erasmus / international university situations
+- group work
+- asking for feedback
+- explaining why something was not finished
+- discussing a technical report
+
+ENGINEERING / MECHATRONICS
+
+- sensors
+- actuators
+- PLC programming
+- control systems
+- feedback
+- disturbances
+- motors
+- encoders
+- measurement
+- calibration
+- uncertainty
+- repeatability
+- testing
+- signal noise
+- oscillation
+- overshoot
+- steady state
+- wiring
+- connectors
+- faults
+- troubleshooting
+- CAD
+- mechanical parts
+- bearings
+- shafts
+- production equipment
+- safety
+- machine setup
+- design constraints
+- tolerances
+- technical presentations
+
+Use technically sensible language.
+
+Do not misuse technical terms merely to make a sentence sound advanced.
+
+WORK / PRODUCTION / PROJECTS
+
+- production lines
+- maintenance
+- drawings
+- revisions
+- meetings
+- deadlines
+- project responsibility
+- proposing changes
+- discussing whether something is feasible
+- explaining a fault
+- asking a colleague for help
+- documenting a change
+- inspecting equipment
+- communicating delays
+- checking measurements
+- discussing manufacturing constraints
+
+TRAVEL / COMMUTING
+
+- train connections
+- bus delays
+- platforms
+- transfers
+- tickets
+- travelling between cities
+- hotel check-in
+- airport situations
+- missed connections
+- finding accommodation
+- booking changes
+- asking directions
+- luggage
+- travelling abroad
+- rental situations
+
+Do NOT overuse street names.
+
+There are currently too many street/address-style examples.
+
+Street names should be rare.
+
+EVERYDAY PRACTICAL LIFE
+
+- cooking
+- shopping
+- fixing something at home
+- cleaning
+- doing laundry
+- charging devices
+- losing keys
+- returning products
+- collecting a parcel
+- calling customer support
+- paying a bill
+- ordering food
+- talking to friends
+- planning the weekend
+- weather changing plans
+- borrowing something
+- household tools
+- cafés
+- appointments
+- waiting for someone
+- explaining an everyday problem
+
+SPORT
+
+- cycling
+- gym training
+- running
+- recovery
+- arranging training
+- preparing equipment
+- changing plans because of weather
+- describing a difficult session
+- events/races
+- travelling with sports equipment
+
+ADVANCED / PROFESSIONAL
+
+- discussing evidence
+- uncertainty
+- assumptions
+- trade-offs
+- limitations
+- disagreement
+- evaluating an alternative
+- explaining why a conclusion may be wrong
+- making recommendations
+- challenging an assumption politely
+- describing unintended consequences
+
+==================================================
+PART 6 — LANGUAGE DIFFICULTY
+==================================================
+
+Approximate overall contextual difficulty:
+
+20% B1
+55% B2
+25% C1
+
+Do NOT interpret C1 as "use strange vocabulary".
+
+C1 should mean:
+
+- more realistic sentence structure
+- subordinate clauses
+- nuanced context
+- natural collocations
+- longer dependencies
+- implicit clues
+- professional language
+- technically meaningful context
+
+The grammar being tested can remain simple even when the surrounding sentence is sophisticated.
+
+Example:
+
+B1:
+I arrived ___ the station at seven.
+
+B2:
+When I arrived ___ the laboratory, the others had already started the measurement.
+
+C1:
+By the time we arrived ___ the test facility, the engineers had already ruled out a mechanical fault.
+
+The target may still simply be "at".
+
+==================================================
+PART 7 — STYLE ANCHORS
+==================================================
+
+Use the following ORIGINAL examples as style references.
+
+Do not merely copy them repeatedly with nouns substituted.
+
+--------------------
+IN / ON / AT
+--------------------
+
+The lecture starts ___ eight, but most students arrive ten minutes earlier.
+We usually meet ___ the laboratory before starting the experiment.
+The results will be presented ___ Monday afternoon.
+I left the spare connector ___ my desk.
+We spent most of the morning ___ the workshop checking the assembly.
+The professor wasn't ___ his office when I went to ask him.
+The train stopped ___ Dresden for almost twenty minutes.
+I'll probably be ___ Prague by six if the connection isn't delayed.
+The sensor failed ___ the middle of the test.
+I normally work ___ the production floor when a machine needs measuring.
+We discussed the issue ___ the meeting yesterday.
+The report has to be submitted ___ the end of the week.
+He noticed the crack ___ the surface of the component.
+The values are shown ___ the graph on the second page.
+We were still ___ the bus when the meeting started.
+The bike started making a strange noise ___ the way home.
+I left my helmet ___ the locker room.
+The measurement changed significantly ___ higher temperatures.
+
+--------------------
+ARTICLES
+--------------------
+
+We need ___ new sensor because the current one is damaged.
+___ sensor we installed yesterday is already giving unstable readings.
+She works as ___ automation engineer.
+Can you pass me ___ adjustable wrench from the toolbox?
+___ feedback from the supervisor was more positive than I expected.
+We spent ___ whole afternoon trying to reproduce the fault.
+I usually drink coffee before ___ first lecture of the day.
+___ measurement uncertainty must be included in the final report.
+He bought ___ used bicycle for commuting to university.
+___ bicycle he bought last month already needs a new chain.
+We need to find ___ alternative before changing the entire design.
+___ information in this datasheet doesn't match our measurement.
+After ___ lunch, we went back to the laboratory.
+___ students in our group have access to the same equipment.
+That was ___ most useful explanation I've heard so far.
+They installed ___ encoder on the motor shaft.
+___ encoder measures the angular position of the shaft.
+
+--------------------
+QUANTIFIERS
+--------------------
+
+We don't have ___ time left before the laboratory closes.
+There are ___ measurements that still need to be repeated.
+I made ___ progress once I understood what the error message meant.
+Only ___ students stayed after class to ask questions.
+We have ___ useful information, but not enough to identify the fault.
+There isn't ___ space between the housing and the sensor.
+Do you have ___ experience with Siemens PLCs?
+I've had ___ problems with this laptop since the update.
+We still need ___ more measurements before drawing a conclusion.
+Very ___ people noticed the change in the timetable.
+There was ___ traffic this morning, so I arrived earlier than expected.
+I need ___ help carrying the bike onto the train.
+
+--------------------
+DO / MAKE / TAKE / HAVE
+--------------------
+
+We need to ___ a decision before ordering the parts.
+I accidentally ___ a mistake in the calculation.
+Let's ___ a short break before the next test.
+I still need to ___ some research before choosing the sensor.
+We ___ a meeting with the project supervisor tomorrow.
+It took us two hours to ___ the measurement properly.
+Try to ___ your best even if the presentation doesn't go perfectly.
+Who will ___ responsibility for updating the drawing?
+I usually ___ a shower after training.
+We finally ___ some progress once we checked the wiring.
+I need to ___ an appointment at the study department.
+Let's ___ another measurement before replacing the component.
+Did you ___ any problems during the installation?
+
+--------------------
+SAY / TELL / SPEAK / TALK
+--------------------
+
+Could you ___ me what exactly went wrong?
+I need to ___ to the professor about the deadline.
+She ___ that the laboratory would be closed tomorrow.
+Can you ___ English during the presentation?
+We spent an hour ___ about possible solutions.
+Nobody ___ me that the timetable had changed.
+What did the technician ___ about the faulty sensor?
+I'd like to ___ to someone responsible for the project.
+He didn't ___ much during the meeting.
+Let me ___ you what happened during the test.
+We should ___ about this before making a decision.
+
+--------------------
+SINCE / FOR / AGO
+--------------------
+
+I've been studying mechatronics ___ several years.
+We've been waiting for the bus ___ almost forty minutes.
+The machine has been running continuously ___ Monday.
+I replaced the chain three weeks ___.
+We've used this measurement setup ___ the beginning of the semester.
+I haven't spoken to the supervisor ___ last Thursday.
+The fault first appeared two days ___.
+I've had this laptop ___ nearly four years.
+The project has been delayed ___ September.
+I finished the report half an hour ___.
+The motor has been making that noise ___ yesterday afternoon.
+
+--------------------
+PRESENT PERFECT VS PAST SIMPLE
+--------------------
+
+I ___ the report yesterday evening.
+I ___ already ___ the report, so I can send it now.
+We ___ this sensor three times so far.
+We ___ the sensor during yesterday's laboratory session.
+I ___ never ___ this type of PLC before.
+I ___ with a similar PLC during my bachelor's project.
+The train ___ ten minutes ago.
+The train ___ just ___.
+I ___ three coffees today and it's only noon.
+I ___ three coffees during yesterday's night shift.
+We ___ the cause of the problem yet.
+The technician ___ the damaged cable this morning.
+
+Use varied verbs, not only "do", "go", "see" and "finish".
+
+--------------------
+PAST SIMPLE VS PAST CONTINUOUS
+--------------------
+
+I ___ the oscilloscope when the signal suddenly disappeared.
+While we ___ the motor, the temperature started rising.
+I ___ home when I noticed the rear tyre was losing pressure.
+The professor ___ the task while several students were still opening the software.
+We ___ the wiring when someone switched the machine on.
+While the train ___ through Germany, I worked on my report.
+The machine ___ normally until the sensor failed.
+I ___ dinner when my teammate called about the project.
+While I ___ for the bus, I realised I had left my laptop at school.
+The controller ___ correctly when the disturbance occurred.
+
+--------------------
+THIS / THAT / THESE / THOSE
+--------------------
+
+___ connector here is the one we need.
+Can you see ___ warning light over there?
+___ measurements on my screen don't match yours.
+Who left ___ tools on the other bench?
+___ is exactly what I was trying to explain.
+I don't understand why ___ happened yesterday.
+Are ___ your cycling shoes here by the door?
+Look at ___ clouds over the mountains.
+___ results we obtained today are much more consistent.
+
+--------------------
+WHO / WHICH / THAT
+--------------------
+
+The technician ___ repaired the machine explained the fault to us.
+The sensor ___ we ordered hasn't arrived yet.
+Students ___ miss the laboratory have to arrange a replacement session.
+The software ___ controls the test bench crashed twice.
+The professor ___ teaches this subject also supervises our project.
+The report ___ I submitted yesterday still contains one mistake.
+The component ___ failed was installed only last month.
+The colleague ___ showed me the system works in maintenance.
+The measurement method ___ we used has one important limitation.
+
+--------------------
+COMMON PREPOSITIONS
+--------------------
+
+I sent the updated drawing ___ my supervisor.
+We need more time ___ the final measurement.
+I spoke ___ the technician about the strange noise.
+There's something wrong ___ the encoder signal.
+The professor asked us ___ the reason for the delay.
+I compared our result ___ the reference value.
+We talked ___ the project during lunch.
+Can you help me ___ this calculation?
+The supplier provided us ___ a revised datasheet.
+I need to prepare ___ tomorrow's presentation.
+This depends ___ how accurate the sensor needs to be.
+The problem is related ___ the grounding of the system.
+
+--------------------
+VERB + PREPOSITION
+--------------------
+
+The result depends ___ the sampling frequency.
+Please listen ___ the motor and tell me if the noise changes.
+We've been waiting ___ approval since Monday.
+I applied ___ the exchange programme last week.
+The system consists ___ three main modules.
+This change could result ___ a slower response.
+We need to focus ___ the most likely cause first.
+He apologised ___ sending the wrong drawing.
+I completely agree ___ your interpretation of the graph.
+The technician dealt ___ the fault before production restarted.
+The final value differs ___ the theoretical prediction.
+Several factors contribute ___ the measurement uncertainty.
+She participated ___ the project during the previous semester.
+The report refers ___ a different version of the standard.
+We rely ___ this sensor for the feedback signal.
+The motor suffers ___ excessive vibration at high speed.
+
+==================================================
+PART 8 — COMPLEX CONTEXTS
+==================================================
+
+At least 25% of newly added prompts should contain richer context.
+
+Examples of complexity:
+
+TIME SEQUENCE
+
+By the time I arrived ___ the laboratory, the others had already completed the first measurement.
+
+CONTRAST
+
+Although we had very ___ information at first, the repeated tests eventually revealed the fault.
+
+CONSEQUENCE
+
+The sensor has been unstable ___ the firmware update, which makes the latest measurements difficult to trust.
+
+TECHNICAL REASONING
+
+Because the output depends ___ the supply voltage, we repeated the test with a regulated power source.
+
+UNIVERSITY COMMUNICATION
+
+I told the professor ___ I hadn't understood the requirement, rather than pretending the task was clear.
+
+WORKPLACE
+
+We need to ___ a decision today; otherwise the supplier won't be able to deliver the parts before production stops.
+
+REAL-LIFE PROBLEM
+
+I was already ___ the train when I realised that my wallet was still on the desk at home.
+
+SPORT
+
+I've been using this bike ___ nearly two years, but I've never had this problem with the brakes before.
+
+The tested grammar choice must remain unambiguous.
+
+==================================================
+PART 9 — CONTENT QUALITY RULES
+==================================================
+
+Every prompt must:
+
+1. Sound like natural English.
+2. Test exactly the intended concept.
+3. Have an unambiguous target answer unless accepted alternatives are explicitly authored.
+4. Avoid unnecessary proper names.
+5. Avoid excessive street/address/location examples.
+6. Avoid artificial textbook filler.
+7. Avoid becoming unnecessarily technical.
+8. Use realistic vocabulary.
+9. Avoid accidentally teaching incorrect technical terminology.
+10. Remain understandable from context.
+
+Do not make sentences bizarre merely to make them memorable.
+
+Do not use sexual, offensive, political or controversial examples in built-in content.
+
+==================================================
+PART 10 — ANTI-REPETITION
+==================================================
+
+The learner specifically reported noticing repeated example types.
+
+Improve anti-repetition further.
+
+Track recent prompt history PER DRILL.
+
+Target:
+
+at least 50 other available prompts before exact repetition where the pool permits.
+
+Keep due reviews and failed concepts pedagogically higher priority.
+
+For a failed concept:
+
+prefer another prompt testing the SAME concept.
+
+Do not immediately repeat the same wording unless no alternative exists.
+
+Persist history across:
+
+- reload
+- PWA restart
+- backup / restore
+
+Bound history so storage does not grow forever.
+
+==================================================
+PART 11 — DIVERSITY VALIDATION
+==================================================
+
+Add authored-content validation.
+
+Check:
+
+- duplicate IDs
+- exact duplicate sentences
+- normalized duplicates
+- obvious near-duplicate templates
+- malformed prompts
+- missing answers
+- concept imbalance
+- topic imbalance
+- insufficient module size
+
+Generate a development report containing:
+
+- prompt count per drill
+- target-answer distribution
+- estimated B1/B2/C1 distribution
+- context-domain distribution
+- duplicate findings
+
+Do not show this technical report to ordinary learners.
+
+==================================================
+PART 12 — TESTING
+==================================================
+
+Add/update tests for:
+
+SESSION SUMMARY
+
+- useful concept names shown
+- relative dates
+- timestamps hidden
+- clean-session state
+
+GAP FILL
+
+- missing phrase accepted
+- whole sentence accepted
+- punctuation normalization
+- whitespace normalization
+- wrong answer rejected
+- full-sentence exercise remains strict
+
+BUTTON INPUT
+
+- immediate submit
+- correct answer
+- incorrect answer
+- correction loop
+- delayed retry
+- no double-submit
+- keyboard accessibility
+- mobile wrapping
+- typed-input exercises remain typed
+
+CONTENT BANK
+
+- required minimum counts
+- concept balance
+- domain distribution within reasonable tolerance
+- duplicate detection
+- anti-repetition
+- retry with different variant
+- persisted history
+- backup/restore compatibility
+
+Run:
+
+- lint
+- full unit/integration test suite
+- production build
+- desktop Playwright tests
+- mobile Chromium tests
+- iPhone WebKit tests
+
+Fix failures before finishing.
+
+Do not modify pedagogical scheduling simply to make tests easier.
+
+==================================================
+FINAL REPORT
+==================================================
+
+At the end report:
+
+1. Total prompt count.
+2. Prompt count per drill.
+3. Approximate B1/B2/C1 distribution.
+4. Context/topic distribution.
+5. Which drills now use buttons.
+6. Which drills still require typing.
+7. How gap-fill evaluation changed.
+8. How session completion changed.
+9. Exact anti-repetition behaviour.
+10. Duplicate/content validation results.
+11. All test results.
+12. Any limitations.
+
+Do not add new product features in this task.

@@ -1,3 +1,4 @@
+import { answer } from './answer';
 import { expect, test, type Page } from '@playwright/test';
 import { drillById } from '../../src/content/drills';
 const concepts = drillById('in-on-at')!.concepts;
@@ -8,10 +9,7 @@ async function correct(page: Page) {
     text = await prompt.innerText();
   const exercise = exerciseFor(text);
   expect(exercise).toBeDefined();
-  await page
-    .getByLabel('Missing preposition', { exact: true })
-    .fill(exercise.answer);
-  await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await answer(page, exercise.answer);
   await expect
     .poll(async () => {
       const next = await prompt
@@ -33,8 +31,7 @@ test('Home → grouped weakness → references → focused correction / delayed 
     .click();
   const original = exerciseFor(await page.getByTestId('prompt').innerText());
   const concept = concepts.find((c) => c.id === original.conceptId)!;
-  await page.getByLabel('Missing preposition', { exact: true }).fill('wrong');
-  await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await answer(page, 'wrong');
   await expect(page.getByText('Not quite. Try again.')).toBeVisible();
   await page.getByRole('link', { name: '← Save & return to drills' }).click();
   await page.getByRole('link', { name: '← Home', exact: true }).click();
@@ -67,7 +64,7 @@ test('Home → grouped weakness → references → focused correction / delayed 
     exact: true,
   });
   await expect(detail).toContainText(original.prompt);
-  await expect(detail).toContainText('You wrote “wrong”');
+  await expect(detail).toContainText('You wrote');
   await detail
     .getByRole('link', { name: 'Review examples', exact: true })
     .click();
@@ -89,22 +86,13 @@ test('Home → grouped weakness → references → focused correction / delayed 
   }
   const failedPrompt = await page.getByTestId('prompt').innerText();
   expect(exerciseFor(failedPrompt).conceptId).toBe(concept.id);
-  await page.getByLabel('Missing preposition', { exact: true }).fill('wrong');
-  await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await answer(page, 'wrong');
   await expect(page.getByText('Not quite. Try again.')).toBeVisible();
-  await page
-    .getByLabel('Missing preposition', { exact: true })
-    .fill('still wrong');
-  await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await answer(page, 'still wrong');
   await expect(
     page.getByText(`The answer is “${exerciseFor(failedPrompt).answer}”.`),
   ).toBeVisible();
-  await page
-    .getByLabel('Missing preposition', { exact: true })
-    .fill(exerciseFor(failedPrompt).answer);
-  await page
-    .getByRole('button', { name: 'Reproduce answer', exact: true })
-    .click();
+  await answer(page, exerciseFor(failedPrompt).answer);
   await expect(page.getByTestId('prompt')).not.toHaveText(failedPrompt);
   for (let i = 0; i < 5; i++) {
     expect(

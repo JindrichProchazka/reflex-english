@@ -13,6 +13,9 @@ import { drillById, drillForConcept } from './content/drills';
 import { APP_NAME } from './config';
 import { db } from './data/database';
 import type { Session } from './domain/models';
+import { answerChoices, responseInstruction } from './domain/answer-input';
+import { sessionSummary } from './domain/session-summary';
+import { SessionSummary } from './features/SessionSummary';
 import { stageLabel } from './domain/vocabulary';
 import { dataOrigin, restoreChannel } from './application/data-events';
 import { WeakAreasCard } from './features/WeakAreasCard';
@@ -276,7 +279,9 @@ function Review() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
+  const [choice, setChoice] = useState<{ exerciseId: string; value: string }>();
   const input = useRef<HTMLTextAreaElement>(null);
+  const buttons = useRef<HTMLDivElement>(null);
   const began = useRef(0);
   const submitting = useRef(false);
   useEffect(() => {
@@ -300,36 +305,32 @@ function Review() {
   }, [id]);
   useEffect(() => {
     began.current = performance.now();
+  }, [session]);
+  useEffect(() => {
+    if (busy) return;
     input.current?.focus({ preventScroll: true });
+    buttons.current?.querySelector('button')?.focus({ preventScroll: true });
     const frame = requestAnimationFrame(keepFocusedInputVisible);
     return () => cancelAnimationFrame(frame);
-  }, [session]);
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!session || !answer.trim() || submitting.current) return;
+  }, [session, busy]);
+  async function handleSubmitAnswer(
+    value: string,
+    durationMs: number,
+    tapped = false,
+  ) {
+    if (!session || !value.trim() || submitting.current) return;
     submitting.current = true;
+    if (tapped) setChoice({ exerciseId: session.exerciseId, value });
     setBusy(true);
     setError('');
     try {
       const exercise = sessionExercise(session);
       if (exercise.evaluation === 'self' && session.wrongCount < 2) {
-        setSession(
-          await prepareAssessment(
-            db,
-            session,
-            answer,
-            performance.now() - began.current,
-          ),
-        );
+        setSession(await prepareAssessment(db, session, value, durationMs));
         setAnswer('');
         return;
       }
-      const result = await recordAnswer(
-        db,
-        session,
-        answer,
-        performance.now() - began.current,
-      );
+      const result = await recordAnswer(db, session, value, durationMs);
       setSession(result.session);
       setAnswer('');
       setNotice(
@@ -346,6 +347,8 @@ function Review() {
           : 'Could not save your answer. Try again.',
       );
     } finally {
+      // Keep the new prompt disabled through a rapid second tap/double-click.
+      if (tapped) await new Promise((resolve) => setTimeout(resolve, 350));
       submitting.current = false;
       setBusy(false);
       input.current?.focus({ preventScroll: true });
@@ -398,6 +401,10 @@ function Review() {
     );
   if (session.completedAt) return <Summary session={session} />;
   const exercise = sessionExercise(session);
+  const options = answerChoices(
+    drillForConcept(exercise.conceptId)?.id,
+    exercise,
+  );
   const initial = session.current?.kind === 'initial';
   const concept = sessionContent(session).find(
     (c) => c.id === exercise.conceptId,
@@ -468,13 +475,17 @@ function Review() {
                   : 'Find the missing word.'}
       </h1>
       <p className="muted">
-        {exercise.instruction
-          ? exercise.instruction
-          : vocabulary
-            ? 'Recall the meaning, then make the language useful.'
-            : initial
-              ? concept.title
-              : 'Recall the missing form from the meaning of the sentence.'}
+        {session.feedback === 'correction'
+          ? 'Type the reference answer to reproduce it.'
+          : options
+            ? 'Choose the missing word or phrase.'
+            : responseInstruction(exercise)
+              ? responseInstruction(exercise)
+              : vocabulary
+                ? 'Recall the meaning, then make the language useful.'
+                : initial
+                  ? concept.title
+                  : 'Recall the missing form from the meaning of the sentence.'}
       </p>
       <div className="card exercise">
         <p className="prompt" data-testid="prompt">
@@ -527,8 +538,58 @@ function Review() {
               </button>
             </div>
           </section>
+        ) : options && session.feedback !== 'correction' ? (
+          <div
+            className="answer-buttons"
+            ref={buttons}
+            role="group"
+            aria-label="Answer choices"
+            aria-describedby="feedback"
+            aria-busy={busy}
+          >
+            {options.map((option) => (
+              <button
+                type="button"
+                key={option}
+                disabled={busy}
+                aria-label={
+                  option === '-' ? 'No article' : option.toUpperCase()
+                }
+                aria-pressed={
+                  choice?.exerciseId === exercise.id && choice.value === option
+                }
+                data-result={
+                  choice?.exerciseId === exercise.id &&
+                  choice.value === option &&
+                  session.feedback === 'hint'
+                    ? 'incorrect'
+                    : undefined
+                }
+                onKeyDown={(event) => {
+                  if (event.repeat) event.preventDefault();
+                }}
+                onClick={() =>
+                  void handleSubmitAnswer(
+                    option,
+                    performance.now() - began.current,
+                    true,
+                  )
+                }
+              >
+                {option === '-' ? '—' : option.toUpperCase()}
+              </button>
+            ))}
+          </div>
         ) : (
-          <form onSubmit={submit}>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleSubmitAnswer(
+                answer,
+                performance.now() - began.current,
+              );
+            }}
+          >
             <label htmlFor="answer">
               {preposition ? 'Missing preposition' : 'Your answer'}
             </label>
@@ -600,97 +661,37 @@ function Review() {
   );
 }
 function Summary({ session }: { session: Session }) {
-  const { data, error } = useDashboard();
+  const [summary, setSummary] = useState<ReturnType<typeof sessionSummary>>();
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let alive = true;
+    Promise.all([
+      loadDashboard(db),
+      db.vocabulary.toArray(),
+      db.studyLessons.toArray(),
+    ])
+      .then(([data, words, lessons]) => {
+        if (alive)
+          setSummary(
+            sessionSummary(
+              session,
+              data.attempts,
+              data.reviews,
+              sessionContent(session),
+              [...words, ...lessons.flatMap((lesson) => lesson.words)],
+            ),
+          );
+      })
+      .catch(() => {
+        if (alive) setError('Could not load your summary. Reload to retry.');
+      });
+    return () => {
+      alive = false;
+    };
+  }, [session]);
   if (error) return <p role="alert">{error}</p>;
-  if (!data) return <p role="status">Loading your summary…</p>;
-  const attempts = data.attempts.filter((a) => a.sessionId === session.id);
-  const first = attempts.filter((a) => a.assistance === 'none');
-  const reviewed = data.reviews.filter((r) =>
-    attempts.some((a) => a.conceptId === r.conceptId),
-  );
-  return (
-    <section className="summary">
-      <p className="eyebrow">PRACTICE SAVED</p>
-      <h1>
-        Good practice.
-        <br />
-        Time to let it settle.
-      </h1>
-      <p className="lede">
-        You’ve recalled every failed concept after a delay and returned to it in
-        closing practice.
-      </p>
-      <div className="stats">
-        <Stat label="Attempts saved" value={attempts.length} />
-        <Stat label="Concepts revisited" value={session.failed.length} />
-        <Stat
-          label="First-attempt accuracy (%)"
-          value={Math.round(
-            (first.filter((a) => a.correct).length /
-              Math.max(1, first.length)) *
-              100,
-          )}
-        />
-      </div>
-      <div className="card">
-        <h2>What happens next</h2>
-        <p>
-          Corrections return sooner. Clean recall gradually earns longer
-          intervals. Same-session repetition never establishes mastery.
-        </p>
-        <ul className="schedule">
-          {reviewed.map((r) => (
-            <li key={r.conceptId}>
-              <span>
-                {
-                  sessionContent(session).find((c) => c.id === r.conceptId)
-                    ?.title
-                }
-                <small>{r.status}</small>
-              </span>
-              <time dateTime={new Date(r.dueAt).toISOString()}>
-                {date(r.dueAt)}
-              </time>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <Link className="button" to="/">
-        Back to home
-      </Link>
-      {session.weakAreaIds && (
-        <p>
-          <Link className="button" to="/mistakes">
-            Return to weak areas
-          </Link>
-        </p>
-      )}
-      {session.drillId && (
-        <p>
-          <Link className="button" to="/drills">
-            Return to Quick Reflex Drills
-          </Link>
-        </p>
-      )}
-      {session.module === 'vocabulary' && !session.weakAreaIds && (
-        <p>
-          <Link to="/vocabulary">Return to vocabulary library</Link>
-        </p>
-      )}
-      {session.lessonId && (
-        <p>
-          <Link
-            className="button"
-            to={`/vocabulary/lessons/${session.lessonId}?mode=${session.studyMode === 'recall' ? 'context' : 'learn'}`}
-          >
-            {session.studyMode === 'recall'
-              ? 'Continue to Use in Context'
-              : 'Return to lesson progress'}
-          </Link>
-        </p>
-      )}
-    </section>
-  );
+  if (!summary) return <p role="status">Loading your summary…</p>;
+  return <SessionSummary session={session} summary={summary} />;
 }
 export default function App() {
   useInputViewport();

@@ -12,6 +12,7 @@ export const drillTopics = [
   'household',
   'errands',
   'social',
+  'advanced',
 ] as const;
 export type DrillTopic = (typeof drillTopics)[number];
 export type DrillLevel = 'B1' | 'B2' | 'C1';

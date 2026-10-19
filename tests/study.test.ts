@@ -217,7 +217,7 @@ describe('shared lesson learning loop and progress', () => {
     const production = s.content!.find((c) => c.id === first.conceptId)!
       .exercises[1];
     expect(production.lessonEvidence).toBe('production');
-    expect(production.instruction).toContain('WHOLE sentence');
+    expect(production.instruction).toContain('whole sentence');
     expect(
       phraseEvaluator.evaluate(first.answer, production.acceptedAnswers!),
     ).toBe(false);

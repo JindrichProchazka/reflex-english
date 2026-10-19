@@ -407,7 +407,11 @@ describe('existing persistence, Weak Areas, backups and mastery', () => {
     expect(focused.current!.conceptId).toBe(s.current!.conceptId);
     expect(
       focused.content!.find((c) => c.id === s.current!.conceptId)!.exercises,
-    ).toHaveLength(10);
+    ).toHaveLength(
+      drills
+        .flatMap((d) => d.concepts)
+        .find((c) => c.id === s.current!.conceptId)!.exercises.length,
+    );
     await finish(db, focused);
   });
   it('round-trips active drills, grammar mistakes, worksheets, attempts and schedules through backup/reopen', async () => {

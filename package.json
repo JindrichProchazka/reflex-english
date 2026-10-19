@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "format": "prettier --write src tests *.ts *.json *.html",
     "test:e2e": "playwright test",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "report:drills": "node scripts/report-drills.mjs"
   },
   "dependencies": {
     "dexie": "^4.4.6",

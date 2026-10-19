@@ -1,5 +1,5 @@
 import type { Concept, PromptHistory } from './models';
-export const PROMPT_COOLDOWN = 30;
+export const PROMPT_COOLDOWN = 50;
 export const PROMPT_HISTORY_LIMIT = 96;
 export const historyFor = (
   history: PromptHistory | undefined,

@@ -1,3 +1,4 @@
+import { answer } from './answer';
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { drills, drillById } from '../../src/content/drills';
@@ -36,13 +37,11 @@ test('Quick Reflex Drills → articles → error/correction → varied delayed r
   await articles
     .getByRole('button', { name: 'Start Quick', exact: true })
     .click();
-  const prompt = page.getByTestId('prompt'),
-    input = page.getByLabel('Your answer', { exact: true });
+  const prompt = page.getByTestId('prompt');
   const exercises = drillById('articles')!.concepts.flatMap((c) => c.exercises);
   const originalText = await prompt.innerText();
   const original = exercises.find((e) => e.prompt === originalText)!;
-  await input.fill('wrong');
-  await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await answer(page, 'wrong');
   await expect(
     page.getByText('Not quite. Try again.', { exact: true }),
   ).toBeVisible();
@@ -51,15 +50,11 @@ test('Quick Reflex Drills → articles → error/correction → varied delayed r
   await expect(
     page.getByText('Not quite. Try again.', { exact: true }),
   ).toBeVisible();
-  await input.fill('still wrong');
-  await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await answer(page, 'still wrong');
   await expect(
     page.getByText(`The answer is “${original.answer}”.`, { exact: true }),
   ).toBeVisible();
-  await input.fill(original.answer);
-  await page
-    .getByRole('button', { name: 'Reproduce answer', exact: true })
-    .click();
+  await answer(page, original.answer);
   await expect(prompt).not.toHaveText(original.prompt);
   let steps = 0,
     returns = 0;
@@ -77,10 +72,7 @@ test('Quick Reflex Drills → articles → error/correction → varied delayed r
           'CLOSING RECALL',
         );
     }
-    await input.fill(exercise.answer);
-    await page
-      .getByRole('button', { name: 'Check answer', exact: true })
-      .click();
+    await answer(page, exercise.answer);
     await expect
       .poll(async () => {
         const next = await prompt
@@ -133,7 +125,7 @@ test('recent exact prompts stay avoided across completed sessions, page closure 
   const drill = drillById('articles')!,
     exercises = drill.concepts.flatMap((c) => c.exercises);
   const seen: string[] = [];
-  for (let round = 0; round < 2; round++) {
+  for (let round = 0; round < 3; round++) {
     await page.goto('./#/drills');
     await page
       .getByRole('region', { name: 'Articles', exact: true })
@@ -150,14 +142,9 @@ test('recent exact prompts stay avoided across completed sessions, page closure 
       expect(exercise).toBeDefined();
       const previous = seen.lastIndexOf(exercise.id);
       if (previous >= 0)
-        expect(seen.length - previous - 1).toBeGreaterThanOrEqual(30);
+        expect(seen.length - previous - 1).toBeGreaterThanOrEqual(50);
       seen.push(exercise.id);
-      await page
-        .getByLabel('Your answer', { exact: true })
-        .fill(exercise.answer);
-      await page
-        .getByRole('button', { name: 'Check answer', exact: true })
-        .click();
+      await answer(page, exercise.answer);
       await expect
         .poll(async () => {
           const next = await prompt

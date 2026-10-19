@@ -1,0 +1,340 @@
+{
+  "total": 2560,
+  "modules": [
+    {
+      "id": "in-on-at",
+      "count": 220,
+      "concepts": 12,
+      "targets": {
+        "AT": 70,
+        "IN": 75,
+        "ON": 75
+      },
+      "conceptCounts": {
+        "clock": 20,
+        "point": 21,
+        "activity": 19,
+        "address": 10,
+        "month": 19,
+        "daypart": 18,
+        "city": 17,
+        "inside": 21,
+        "day": 19,
+        "specificday": 18,
+        "transport": 17,
+        "surface": 21
+      }
+    },
+    {
+      "id": "articles",
+      "count": 260,
+      "concepts": 14,
+      "targets": {
+        "a": 58,
+        "an": 55,
+        "the": 76,
+        "-": 71
+      },
+      "conceptCounts": {
+        "drill:articles:first-consonant": 24,
+        "drill:articles:first-vowel": 22,
+        "drill:articles:known": 21,
+        "drill:articles:identified": 22,
+        "drill:articles:profession-a": 18,
+        "drill:articles:profession-an": 18,
+        "drill:articles:plural-general": 19,
+        "drill:articles:mass-general": 20,
+        "drill:articles:unique": 14,
+        "drill:articles:superlative": 19,
+        "drill:articles:institution": 13,
+        "drill:articles:fixed": 19,
+        "drill:articles:unusual-vowel-sound": 15,
+        "drill:articles:unusual-consonant-sound": 16
+      }
+    },
+    {
+      "id": "quantifiers",
+      "count": 220,
+      "concepts": 10,
+      "targets": {
+        "some": 38,
+        "any": 39,
+        "much": 25,
+        "many": 25,
+        "few": 24,
+        "a few": 24,
+        "little": 22,
+        "a little": 23
+      },
+      "conceptCounts": {
+        "drill:quantifiers:some-plural": 19,
+        "drill:quantifiers:some-mass": 19,
+        "drill:quantifiers:any-negative": 20,
+        "drill:quantifiers:any-question": 19,
+        "drill:quantifiers:much": 25,
+        "drill:quantifiers:many": 25,
+        "drill:quantifiers:few": 24,
+        "drill:quantifiers:a-few": 24,
+        "drill:quantifiers:little": 22,
+        "drill:quantifiers:a-little": 23
+      }
+    },
+    {
+      "id": "do-make-take-have",
+      "count": 220,
+      "concepts": 12,
+      "targets": {
+        "make": 61,
+        "do": 51,
+        "take": 53,
+        "have": 55
+      },
+      "conceptCounts": {
+        "drill:do-make-take-have:decision": 21,
+        "drill:do-make-take-have:mistake": 20,
+        "drill:do-make-take-have:progress": 20,
+        "drill:do-make-take-have:homework": 13,
+        "drill:do-make-take-have:research": 19,
+        "drill:do-make-take-have:best": 19,
+        "drill:do-make-take-have:shower": 15,
+        "drill:do-make-take-have:break": 19,
+        "drill:do-make-take-have:responsibility": 19,
+        "drill:do-make-take-have:meeting": 18,
+        "drill:do-make-take-have:experience": 19,
+        "drill:do-make-take-have:problem": 18
+      }
+    },
+    {
+      "id": "say-tell-speak-talk",
+      "count": 200,
+      "concepts": 13,
+      "targets": {
+        "say": 45,
+        "tell": 64,
+        "speak": 44,
+        "talk": 47
+      },
+      "conceptCounts": {
+        "drill:say-tell-speak-talk:say-words": 16,
+        "drill:say-tell-speak-talk:say-that": 14,
+        "drill:say-tell-speak-talk:tell-person": 18,
+        "drill:say-tell-speak-talk:tell-that": 16,
+        "drill:say-tell-speak-talk:language": 15,
+        "drill:say-tell-speak-talk:conversation-to": 16,
+        "drill:say-tell-speak-talk:topic": 16,
+        "drill:say-tell-speak-talk:tell-truth": 15,
+        "drill:say-tell-speak-talk:say-to": 15,
+        "drill:say-tell-speak-talk:tell-instruction": 15,
+        "drill:say-tell-speak-talk:speak-up": 15,
+        "drill:say-tell-speak-talk:speak-for": 14,
+        "drill:say-tell-speak-talk:talk-through": 15
+      }
+    },
+    {
+      "id": "since-for-ago",
+      "count": 180,
+      "concepts": 10,
+      "targets": {
+        "since": 73,
+        "for": 60,
+        "ago": 47
+      },
+      "conceptCounts": {
+        "drill:since-for-ago:since-year": 13,
+        "drill:since-for-ago:since-day": 16,
+        "drill:since-for-ago:since-event": 17,
+        "drill:since-for-ago:since-time": 15,
+        "drill:since-for-ago:for-years": 20,
+        "drill:since-for-ago:for-short": 22,
+        "drill:since-for-ago:for-finished": 18,
+        "drill:since-for-ago:ago-short": 24,
+        "drill:since-for-ago:ago-long": 23,
+        "drill:since-for-ago:since-expressions": 12
+      }
+    },
+    {
+      "id": "present-perfect-past-simple",
+      "count": 220,
+      "concepts": 10,
+      "targets": {
+        "present-perfect": 136,
+        "past-simple": 84
+      },
+      "conceptCounts": {
+        "drill:present-perfect-past-simple:experience": 18,
+        "drill:present-perfect-past-simple:never": 19,
+        "drill:present-perfect-past-simple:ever": 18,
+        "drill:present-perfect-past-simple:unfinished": 21,
+        "drill:present-perfect-past-simple:recent": 19,
+        "drill:present-perfect-past-simple:already-just": 20,
+        "drill:present-perfect-past-simple:yet": 21,
+        "drill:present-perfect-past-simple:yesterday": 28,
+        "drill:present-perfect-past-simple:dated": 28,
+        "drill:present-perfect-past-simple:finished-period": 28
+      }
+    },
+    {
+      "id": "past-simple-continuous",
+      "count": 200,
+      "concepts": 10,
+      "targets": {
+        "past-simple": 83,
+        "past-continuous": 117
+      },
+      "conceptCounts": {
+        "drill:past-simple-continuous:complete": 20,
+        "drill:past-simple-continuous:background-i": 19,
+        "drill:past-simple-continuous:background-we": 19,
+        "drill:past-simple-continuous:interruption-long": 21,
+        "drill:past-simple-continuous:interruption-event": 22,
+        "drill:past-simple-continuous:parallel-one": 20,
+        "drill:past-simple-continuous:parallel-many": 19,
+        "drill:past-simple-continuous:story-sequence": 22,
+        "drill:past-simple-continuous:story-scene": 19,
+        "drill:past-simple-continuous:finished-count": 19
+      }
+    },
+    {
+      "id": "this-that-these-those",
+      "count": 160,
+      "concepts": 10,
+      "targets": {
+        "this": 48,
+        "that": 34,
+        "these": 47,
+        "those": 31
+      },
+      "conceptCounts": {
+        "drill:this-that-these-those:near-item": 18,
+        "drill:this-that-these-those:far-item": 18,
+        "drill:this-that-these-those:near-items": 19,
+        "drill:this-that-these-those:far-items": 17,
+        "drill:this-that-these-those:near-person": 14,
+        "drill:this-that-these-those:near-people": 14,
+        "drill:this-that-these-those:far-people": 14,
+        "drill:this-that-these-those:current-reference": 16,
+        "drill:this-that-these-those:past-reference": 16,
+        "drill:this-that-these-those:near-pages": 14
+      }
+    },
+    {
+      "id": "who-which-that",
+      "count": 160,
+      "concepts": 10,
+      "targets": {
+        "people": 62,
+        "things": 68,
+        "that": 30
+      },
+      "conceptCounts": {
+        "drill:who-which-that:people-subject": 17,
+        "drill:who-which-that:people-service": 16,
+        "drill:who-which-that:people-plural": 13,
+        "drill:who-which-that:people-object": 16,
+        "drill:who-which-that:things-subject": 17,
+        "drill:who-which-that:things-object": 19,
+        "drill:who-which-that:things-plural": 16,
+        "drill:who-which-that:all": 15,
+        "drill:who-which-that:everything": 15,
+        "drill:who-which-that:superlative": 16
+      }
+    },
+    {
+      "id": "common-prepositions",
+      "count": 240,
+      "concepts": 12,
+      "targets": {
+        "to": 62,
+        "for": 63,
+        "with": 61,
+        "about": 54
+      },
+      "conceptCounts": {
+        "drill:common-prepositions:recipient": 23,
+        "drill:common-prepositions:destination": 19,
+        "drill:common-prepositions:response": 20,
+        "drill:common-prepositions:beneficiary": 21,
+        "drill:common-prepositions:purpose": 23,
+        "drill:common-prepositions:reason": 19,
+        "drill:common-prepositions:companion": 19,
+        "drill:common-prepositions:tool": 20,
+        "drill:common-prepositions:feature": 22,
+        "drill:common-prepositions:topic": 19,
+        "drill:common-prepositions:concern": 18,
+        "drill:common-prepositions:thinking": 17
+      }
+    },
+    {
+      "id": "verb-preposition-patterns",
+      "count": 280,
+      "concepts": 20,
+      "targets": {
+        "in": 41,
+        "at": 15,
+        "on": 43,
+        "to": 55,
+        "for": 56,
+        "with": 29,
+        "of": 14,
+        "from": 27
+      },
+      "conceptCounts": {
+        "drill:verb-preposition-patterns:arrive-area": 13,
+        "drill:verb-preposition-patterns:arrive-point": 15,
+        "drill:verb-preposition-patterns:depend": 16,
+        "drill:verb-preposition-patterns:listen": 15,
+        "drill:verb-preposition-patterns:wait": 14,
+        "drill:verb-preposition-patterns:ask": 15,
+        "drill:verb-preposition-patterns:belong": 14,
+        "drill:verb-preposition-patterns:deal": 14,
+        "drill:verb-preposition-patterns:agree": 15,
+        "drill:verb-preposition-patterns:apologize": 13,
+        "drill:verb-preposition-patterns:apply": 14,
+        "drill:verb-preposition-patterns:focus": 14,
+        "drill:verb-preposition-patterns:refer": 13,
+        "drill:verb-preposition-patterns:result": 14,
+        "drill:verb-preposition-patterns:consist": 14,
+        "drill:verb-preposition-patterns:contribute": 13,
+        "drill:verb-preposition-patterns:participate": 14,
+        "drill:verb-preposition-patterns:suffer": 13,
+        "drill:verb-preposition-patterns:rely": 13,
+        "drill:verb-preposition-patterns:differ": 14
+      }
+    }
+  ],
+  "levels": {
+    "B1": 516,
+    "B2": 1392,
+    "C1": 652
+  },
+  "topics": {
+    "commuting": 56,
+    "office": 270,
+    "social": 117,
+    "sport": 205,
+    "university": 461,
+    "laboratory": 85,
+    "hospitality": 68,
+    "manufacturing": 114,
+    "engineering": 478,
+    "travel": 183,
+    "household": 297,
+    "advanced": 179,
+    "errands": 47
+  },
+  "domains": {
+    "travel": 307,
+    "workplace": 384,
+    "everyday": 461,
+    "sport": 205,
+    "university": 461,
+    "engineering": 563,
+    "advanced": 179
+  },
+  "newPrompts": 1197,
+  "richNewPrompts": 330,
+  "exactDuplicates": [],
+  "duplicates": [],
+  "nearDuplicates": [],
+  "errors": []
+}

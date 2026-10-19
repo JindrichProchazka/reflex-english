@@ -44,3 +44,18 @@ Unit-test the scheduler, mastery, hint evidence, normalization, conceptual mista
 ## Unknowns and chosen defaults
 
 No blocking unknowns or irreversible decisions are outstanding. Keep interval details, weak-topic weighting and hint/minor-error penalties explicit and changeable in policy modules. Paper timing is unknown, not zero; self-assessment remains distinguishable from automatic evaluation. Defer optional voice, optional reflex mode and AI evaluation until the core V1 is stable. Determine the deployment base path from repository metadata when implementing GitHub Actions, so the repository name is not a blocker.
+
+## Learning UX refinements (2026-10-19)
+
+1. Derive a compact learner summary from existing attempts/reviews and resolve names from lesson/personal words or immutable session snapshots; keep exact scheduling in optional details.
+2. Reuse existing lesson evidence types to distinguish gap understanding from whole-sentence production; expand only gap accepted answers with the completed authored frame, including resumed snapshots.
+3. Define bounded grammar input sets separately from UI; submit buttons through the existing writer, retain typed correction/verb forms, and guard rapid activation.
+4. Add domain/UI/browser regressions, verify iPhone-width wrapping, then run lint, the full unit suite, build and browser regressions. See LEARNING_UX.md.
+
+## Daily-use content refinement (authorized 2026-10-19)
+
+1. Preserve the existing UX refinement and tighten bounded answer feedback; keep verb/preposition patterns typed where their pool is broad.
+2. Append 1,197 literal authored sentences to the twelve existing modules, targeting the requested 2,560 total and seven-domain / 20-55-25 difficulty distributions. Keep all IDs, snapshots and original text.
+3. Increase the shared per-drill cooldown to 50 presentations while retaining the bounded 96-ID history, transactions, due priority and five-prompt varied failures.
+4. Validate module sizes, targets/concept coverage, metadata/domain balance, normalized/near duplicates and rich new contexts; publish a developer report.
+5. Add compatibility and selection regressions; run lint, all unit tests, production build and desktop/mobile/WebKit browser checks. Report any host-policy block honestly.

@@ -1,7 +1,11 @@
 import { concepts } from '../content/prepositions';
 import { drillForConcept, drillById } from '../content/drills';
 import { LearningDatabase } from '../data/database';
-import { controlledEvaluator, phraseEvaluator } from '../domain/evaluation';
+import {
+  acceptedExerciseAnswers,
+  controlledEvaluator,
+  phraseEvaluator,
+} from '../domain/evaluation';
 import { newId } from '../domain/id';
 import type { Attempt, Session } from '../domain/models';
 import { persistLearningResult } from './results';
@@ -161,7 +165,7 @@ export async function recordAnswer(
         : (exercise.entryId || exercise.conceptId.startsWith('drill:')
             ? phraseEvaluator
             : controlledEvaluator
-          ).evaluate(answer, exercise.acceptedAnswers ?? [exercise.answer]);
+          ).evaluate(answer, acceptedExerciseAnswers(exercise));
       const attempt: Attempt = {
         id: newId(),
         sessionId: session.id,

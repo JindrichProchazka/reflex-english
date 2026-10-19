@@ -22,7 +22,7 @@ async function finishLesson(
     const production =
       mode === 'context' &&
       (await page.locator('main .muted').innerText()).includes(
-        'WHOLE sentence',
+        'whole sentence',
       );
     const exercise = content.find(
       (e) =>

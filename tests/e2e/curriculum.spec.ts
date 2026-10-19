@@ -14,7 +14,7 @@ async function complete(page: Page, mode: StudyMode) {
     const full =
       mode === 'context' &&
       (await page.locator('main .muted').innerText()).includes(
-        'WHOLE sentence',
+        'whole sentence',
       );
     const exercise = exercises.find(
       (e) =>

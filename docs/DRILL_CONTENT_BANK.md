@@ -1,82 +1,86 @@
-# Expanded drill bank and persistent prompt recency
+# Authored Quick Reflex Drill bank: daily-use refinement
 
-## Implementation plan
+The bank contains **2,560 prompts across the same twelve modules and 143 stable concepts**. This adds **1,197 literal authored sentences** to the original 1,363, retaining every original ID, prompt, accepted answer and editorial tag. Differ from is added as a stable concept inside the existing Verb + Preposition Patterns module. No learning mode, scheduler, mastery model, database table or data version is added.
 
-1. Expand the twelve existing modules to 100–150 original variants each, keeping existing exercise IDs/text and adding practical contexts and further patterns inside existing modules. Explicit editorial CEFR/context tags make distribution inspectable; no AI enrichment or runtime sentence templates.
-2. Add a pure recent-variant selector to the shared session engine. Prefer never/recently unseen variants, aim for 30 intervening prompts, fall back to least-recently shown variants for constrained pools, and never displace due priority, five-prompt retries or closing recall.
-3. Store bounded per-drill prompt IDs in the existing IndexedDB settings table, transactionally with session presentation/answer writes. Refresh history from storage across tabs/sessions, bootstrap old attempt evidence, include it in backups and keep old snapshots resumable. No new engine or learning mode.
-4. Validate IDs, normalized exact/near duplicates, accepted answers, metadata, count and target coverage. Report actual counts, difficulty/topic tags and reviewed similarity warnings.
-5. Add recency/persistence/rollback/backup/small-pool tests and browser coverage. Run lint, all unit/integration tests, build and relevant desktop/mobile Playwright regressions.
-
-## Content policy
-
-CEFR labels are editorial estimates of the sentence/task, not a certified assessment. Advanced contexts add natural precision, clause structure and relevant collocations rather than rare-word filler. Short Czech meaning cues remain where several quantifiers/prepositions otherwise fit. Accepted alternatives remain explicit.
-
-Existing grammar/lesson baselines and all historical attempt/worksheet/session snapshots are retained. New content is appended under stable concept IDs, with new patterns added only within an existing module. Original snapshots may contain a smaller variant pool; their state, prompt and answers are not rewritten.
-
-## Current bank
+## Catalogue
 
 | Module | Concepts | Prompts |
 | --- | ---: | ---: |
-| IN / ON / AT | 12 | 120 |
-| Articles | 14 | 140 |
-| Quantifiers | 10 | 100 |
-| DO / MAKE / TAKE / HAVE | 12 | 120 |
-| SAY / TELL / SPEAK / TALK | 13 | 130 |
-| SINCE / FOR / AGO | 10 | 100 |
-| Present Perfect vs Past Simple | 10 | 100 |
-| Past Simple vs Past Continuous | 10 | 100 |
-| THIS / THAT / THESE / THOSE | 10 | 100 |
-| WHO / WHICH / THAT | 10 | 100 |
-| Common Prepositions | 12 | 120 |
-| Verb + Preposition Patterns | 19 | 133 |
-| **Total** | **142** | **1,363** |
+| IN / ON / AT | 12 | 220 |
+| Articles | 14 | 260 |
+| Quantifiers | 10 | 220 |
+| DO / MAKE / TAKE / HAVE | 12 | 220 |
+| SAY / TELL / SPEAK / TALK | 13 | 200 |
+| SINCE / FOR / AGO | 10 | 180 |
+| Present Perfect vs Past Simple | 10 | 220 |
+| Past Simple vs Past Continuous | 10 | 200 |
+| THIS / THAT / THESE / THOSE | 10 | 160 |
+| WHO / WHICH / THAT | 10 | 160 |
+| Common Prepositions | 12 | 240 |
+| Verb + Preposition Patterns | 20 | 280 |
+| **Total** | **143** | **2,560** |
 
-This adds 973 original sentences to the original 390. Existing IDs/text are retained; new variants have append-only `:bank:` IDs. New concepts within existing modules cover a/an sound-versus-spelling contrasts, speak up/for and talk-through patterns, and refer to, result in, consist of, contribute to, participate in, suffer from and rely on. No drill module or learning mode is added.
+Each concept has 10–28 controlled sentence variants. The original address concept remains at ten; no new street-address examples were needed. New content covers lectures, assignments, credit transfers, practical measurement, sensors/controllers/mechanical assemblies, work handovers, travel problems, household tasks, training/recovery and evaluating evidence. New technical contexts avoid treating resolution, repeatability and uncertainty as interchangeable or assuming that a symptom establishes its cause.
 
-The editorial distribution is **B1: 384 (28.2%), B2: 645 (47.3%), C1: 334 (24.5%)**. Tags describe the sentence/task context, not a CEFR certification of the learner or an assertion that an article itself is C1. Legacy sentences have explicit tags too; nothing classifies content through AI or keyword inference at runtime.
+## Requested distribution
 
-| Primary context tag | Prompts |
-| --- | ---: |
-| University / lectures / teachers / assignments | 205 |
-| Office / meetings / project work | 203 |
-| Engineering / controls / troubleshooting | 148 |
-| Household / practical situations | 133 |
-| Social conversation | 117 |
-| Manufacturing / production | 114 |
-| Travel | 100 |
-| Sport / training | 87 |
-| Laboratory / measurements / testing | 85 |
-| Hotels / restaurants / cafés | 68 |
-| Commuting / public transport | 56 |
-| Errands | 47 |
+The complete bank uses **B1: 516 (20.16%), B2: 1,392 (54.38%), C1: 652 (25.47%)**, against the requested 20/55/25 mix. These are editorial estimates of sentence/context difficulty, not certified CEFR assessment. Natural clauses, dependencies and reasoning establish the richer contexts, not rare-word decoration.
 
-Tags assign one primary context per sentence; topics overlap in real use. Technical engineering/lab/production accounts for 25.5%, university 15.0%, office/project work 14.9%, household/social/errands 21.8%, travel/commuting/hospitality 16.4%, sport 6.4%.
+| User-specified domain | Prompts | Share |
+| --- | ---: | ---: |
+| University / studying | 461 | 18.01% |
+| Engineering / mechatronics / laboratories | 563 | 21.99% |
+| Workplace / manufacturing / project work | 384 | 15.00% |
+| Travel / commuting / administration | 307 | 11.99% |
+| Everyday practical life / home / errands / social | 461 | 18.01% |
+| Sport / training / hobbies | 205 | 8.01% |
+| Advanced professional / abstract discussion | 179 | 6.99% |
 
-## Selection and persistence
+Existing granular tags remain intact. The explicit mapping in `src/content/drill-policy.ts` groups laboratory with engineering; office/manufacturing with workplace; travel/commuting/hospitality with travel; household/errands/social with everyday. New advanced discussion has its own tag. Every sentence has one primary domain; contexts can overlap in actual use. We applied the user's requested distribution to the combined bank, rather than applying it only to additions and leaving the overall mix unchanged.
 
-The shared domain selector uses a per-drill 30-prompt cooldown. It prefers variants outside that window, then never/least-recently shown alternatives, with seeded ties. It avoids the last variant of the same concept whenever another variant exists. When all candidates are recent it chooses a least-recent different variant; it never removes an exercise or breaks a failed-retry deadline to satisfy a cosmetic gap. Concept ties also deprioritize fully recent variant pools within the existing target/priority constraints. Original due/weak priority, focused acquisition, constrained target ordering and closing recall remain in the same engine.
+A conservative structural proxy finds **330 / 1,197 additions (27.57%)** with at least fourteen tokens and a contextual clause/dependency marker. This checks the minimum 25% richer-context requirement without claiming semantic understanding. Longer technical/abstract contexts use meaningful contrast, time sequence, consequence or a qualification of evidence. Some other natural contexts do not satisfy the proxy; it is not a language-quality score.
 
-The existing settings table stores `drill-history:<module-id>` → `{version: 1, promptIds: [...]}`, capped at 96 presentation IDs. Session snapshots hold the matching bounded history and concept ownership for the pure selector. New sessions save the first presentation before returning to the UI. Answer transactions refresh history from IndexedDB, select/save the next presentation and commit it with attempts, mistakes, mastery, schedules and session state. This prevents one active tab from overwriting another tab’s history. Wrong guesses and copied corrections on the current prompt do not manufacture additional presentations or learning evidence.
+## Literal content architecture and compatibility
 
-Existing typed attempts bootstrap missing history once, collapsing consecutive attempts on the same presentation and excluding paper grades. Legacy session loading adopts recency without changing its current question, queue or content snapshot. Pure vocabulary exercises retain their existing stage/direction rotation; grammar fillers and focused grammar/worksheet practice share drill recency. Reopening an unfinished session intentionally resumes its current question without counting another presentation.
+`src/content/drill-bank/daily/` contains twelve authored sentence files. The compact format is literal `concept|prompt|answer|accepted alternatives`, with explicit `@topic LEVEL` metadata sections. `authoring.ts` parses data; it does not generate sentences from noun substitutions or runtime templates. Default answers inherit the original concept's accepted alternatives (including natural speak/talk, take/have and relative-clause alternatives); verb-form rows explicitly author the required conjugation and relevant contractions/spelling variants. Quantifier meaning cues distinguish amount/existence and few/a few/little/a little.
 
-Backup envelope 1 / data v4 includes settings history, optional session `promptHistory` and optional exercise level/topic metadata. Data-v1/v2/v3 backups still migrate without rewriting old evidence. IndexedDB stays v5 and vocabulary content baselines stay v1/v2. History is a selection aid, not another mastery or scheduling model.
+Existing IDs/text are never renumbered: additions use per-concept `:daily:` IDs, and the new differ concept has its own namespaced IDs. Append future rows without reordering existing per-concept rows. Tests compare all 1,363 earlier exercise records after expansion and confirm the source is not mutated. Old active snapshots retain their original 3-, 10- or 140-prompt pools rather than being silently upgraded. New sessions use the current bank. Old reviews/mastery/mistakes, attempts, lesson progress and all vocabulary content-v1/v2 resolvers remain unchanged.
 
-## Validation and limits
+## Exact anti-repetition behaviour
 
-`npm run validate:drills` runs the content checks. To print the machine-readable report, use `npm run validate:drills -- --disableConsoleIntercept`. The current report has **zero duplicate module/concept/exercise IDs, zero normalized exact duplicate prompts, zero near-duplicate candidates and zero validation errors**. Checks also enforce one answer gap, non-empty hints/explanations, explicit accepted answers, valid editorial tags, minimum module/concept coverage and target representation.
+The shared selector now targets **50 other per-drill presentations before an exact repeat**, keeping the **96-ID bounded history** in the existing settings records and session snapshots. There is no new storage schema. History is saved transactionally before presentation, refreshed before advancement, retained across reload/PWA reopening and included in full data-v4 backups. Old v1/v2/v3 backups remain restorable through existing migrations; old v4 snapshots remain unchanged.
 
-Near-duplicate detection uses shared word shingles and a token edit distance of at most two for sentences of at least eight tokens. It catches small lexical substitutions without claiming semantic comparison. Tests inject exact duplicates, near templates and malformed/underrepresented content to verify that the checks fail as intended. It cannot prove that every pair is semantically different or that every natural English alternative has been enumerated.
+The selector excludes the latest variant of a concept whenever another exists. It first prefers variants outside the last 50 presentations, then never/least-recently presented variants with seeded ties. Concept ties also deprioritize exhausted pools inside the existing priority/order constraints. Due priority, balanced targets, acquisition pairs, ready failed retrieval and closing recall retain precedence. Failed concepts return after five completed intervening prompts, preferably with different wording; repeat failures restart the same correction loop. We do not delay a due concept just to meet the cosmetic cooldown. Small/exhausted/legacy pools can repeat sooner, using the least-recent different variant. An unfinished session resumes its current prompt without counting another presentation. Hints/copies do not manufacture extra presentations.
 
-The cooldown is a preference under the available concept/priority pool. A failed concept, an urgent due review or a very small/legacy pool can require an earlier exact repeat. Six due concepts are still needed for a due-only session to guarantee five intervening prompts without silently adding non-due material. Controlled literal evaluation and editorial CEFR labels retain their existing limits; no AI evaluator or sentence generator is introduced.
+The bounded record intentionally retains the most recent 96 IDs rather than an ever-growing global history. Future fully recent pools fall back; there is no promise that every prompt is seen before an old prompt returns. Due-only sessions still require six distinct due concepts to guarantee five intervening questions without adding non-due filler.
 
-## Verification (2026-10-18)
+## Learner UX
 
-- `npm run lint`: passed.
-- `npm run validate:drills -- --disableConsoleIntercept`: all four validation tests passed; report totals/labels/contexts are recorded above.
-- `npm test`: all 168 unit/integration tests in 14 files passed, including original scheduler/Weak Areas checks and recency, bounded persistence, cross-session freshness, transaction rollback, backward-compatible restore and old-snapshot adoption.
-- `npm run build`: passed; all feature/content chunks are included in the PWA precache.
-- `npm run test:e2e`: all 85 tests passed across desktop Chromium, Pixel-sized Chromium and WebKit at 375/390/430 px. The recency journey completes two Normal sessions, reloads mid-session, closes/reopens the page, verifies at least 30 intervening prompts before repeats and checks the JSON backup history. Existing learning, correction, paper, Weak Areas, restore, offline and confirmed-update regressions pass too.
+The compact completion summary names actual words/concepts, shows four metrics and at most five difficult items with relative review dates, and hides exact timestamps inside optional scheduling details. Gap understanding accepts the missing phrase or completed authored frame; production requires the whole sentence. Input instructions are explicit, including resumed snapshots.
 
-The new browser test initially checked the exercise loop before asynchronous session loading finished; an explicit visible-prompt wait fixed that test race. The complete final matrix passed with no retries or skips. These are automated browser results, not physical-iPhone verification or a claim of public deployment.
+Nine bounded drills use immediate-submit, keyboard-accessible answer buttons: IN/ON/AT, Articles, Quantifiers, DO/MAKE/TAKE/HAVE, SAY/TELL/SPEAK/TALK, SINCE/FOR/AGO, THIS/THAT/THESE/THOSE, WHO/WHICH/THAT and Common Prepositions. Incorrect selections have a visible selected/feedback state. The synchronous submission lock and brief rapid-tap guard remain. Verb + Preposition Patterns stays typed because its complete answer space is broader; both tense contrasts require actual verb forms and stay typed. Vocabulary, phrases, translations, sentences and all active correction reproduction remain typed. The same result writer, feedback loop and scheduler handle every submission.
+
+## Developer validation and reproducible report
+
+- `npm run validate:drills` runs the content regression checks.
+- `npm run report:drills` writes deterministic `docs/DRILL_BANK_REPORT.json` and prints it. It reuses Vite's installed TypeScript transform without opening a listening server, adding dependencies or exposing a learner-facing report.
+- The report lists module/target/concept counts, editorial levels, granular topics, seven-domain totals, new/richer counts, raw exact/normalized duplicates, near candidates and validation errors.
+- Checks enforce the module-specific minimums, IDs/ownership, one gap, accepted answers, nonempty hints/explanations, valid metadata, minimum and relative concept/target representation. Full-bank domain and difficulty shares must stay within two percentage points of the requested targets. The richer-addition proxy must stay at least 25%.
+- Near detection uses shared word shingles and token edit distance at most two for sentences of at least eight tokens. It flags obvious lexical substitutions but cannot establish semantic uniqueness. The current report has **zero duplicate IDs, zero raw exact duplicates, zero normalized duplicates, zero near candidates and zero errors**.
+
+## Verification
+
+See the final results below. Unit coverage includes the 50-prompt preference over sixteen Normal sessions per module, saturated/small pools, due priority, varied five-prompt failure/repeat failure/closing recall, bounded storage, cross-session refresh, rollback, backup/reopen and old v4 snapshot preservation. Browser recency coverage now completes three Normal sessions (60 prompts), reloads mid-session, closes/reopens the page and checks exact history in the JSON backup. Scheduling and mastery tests retain their existing rules.
+
+The earlier 1,363-prompt increment and its historical test results are recorded in the initial Quick Reflex Drills documentation. This refinement supersedes its 30-prompt and 100–150/module targets. All browser emulation is distinct from physical-iPhone testing, and no local verification implies deployment.
+
+
+### Final results (2026-10-19)
+
+- Lint passed; `git diff --check` passed.
+- All **180 unit/integration tests in 15 files** passed. No scheduler/mastery policy was modified to satisfy a test. The content minimum and obsolete fixed variant-count assertions were updated to the new catalogue; Quick/Normal budgets remain five/ten initial concepts and about 10/20 clean prompts.
+- `npm run validate:drills`: **6 passed**. `npm run report:drills` regenerated the checked-in report with zero findings/errors.
+- Production build passed: 102 modules, 26 precached entries (~881 KiB total); the expanded shared content/history chunk is ~282 KiB raw / 92 KiB gzip. No added dependency/backend or new persistence migration.
+- Canonical full browser command attempted **95 tests**: all **38 desktop/mobile Chromium regressions passed**; **57 WebKit cases failed before page creation** because the Windows host blocked the installed WebKit executable (`spawn UNKNOWN`). Direct launch reconfirmed “Zásada řízení aplikací tento soubor zablokovala.” No security policy was changed or bypassed. WebKit remains unverified and must be rerun on an authorized host where it can launch.
+- Supplemental Chromium checks at **375/390/430 px: 9 passed** (20.3 seconds), using the ignored local width configuration described in LEARNING_UX.md. These are not Safari/WebKit or physical-iPhone results.
+- Desktop/phone screenshots were inspected, including the two-column compact metrics, readable relative review row, expandable details, action wrapping and reflex buttons. No public deployment was performed by this task.

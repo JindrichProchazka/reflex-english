@@ -1,3 +1,4 @@
+import { answer } from './answer';
 import { expect, test, type Page } from '@playwright/test';
 import { PRODUCTION_BASE } from '../../src/config';
 import { drillById } from '../../src/content/drills';
@@ -251,12 +252,7 @@ test('a real waiting service worker updates only after confirmation and preserve
     const exercise = concepts
       .flatMap((c) => c.exercises)
       .find((e) => e.prompt === prompt)!;
-    await page
-      .getByLabel('Missing preposition', { exact: true })
-      .fill(exercise.answer);
-    await page
-      .getByRole('button', { name: 'Check answer', exact: true })
-      .click();
+    await answer(page, exercise.answer);
     await expect(page.getByTestId('prompt')).not.toHaveText(prompt);
     const nextPrompt = await page.getByTestId('prompt').innerText();
     await page

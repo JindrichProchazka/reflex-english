@@ -71,3 +71,13 @@ npm run test:e2e
 ```
 
 The regression matrix uses a separate project-path preview on port 4186, isolated test contexts and test-only update servers. It covers Home, IN / ON / AT correction/retry/completion, lesson Learn, both recall directions, context completion, Weak Areas, personal vocabulary, A4 print/key/results, full backup replacement/reload, manifest/icons/scope, nested hash route refresh, offline reopening/writing, and confirmed updates with retained records. Desktop/Pixel Chromium and WebKit at 375/390/430 px all run the learning flows. Native PDF export is tested in Chromium; all engines inspect print CSS and paper interactions.
+
+
+## Learning UX verification note (2026-10-19)
+
+The current refinement passed lint, 177 unit/integration tests, production build, all 38 desktop/mobile Chromium regressions and 9 supplemental Chromium checks at 375/390/430 px. The canonical WebKit projects were attempted, but Windows Application Control blocked the installed WebKit executable before browser startup (`spawn UNKNOWN`; confirmed by direct launch). Their 57 checks are not verified in this run. No machine security policy was changed. Rerun WebKit on an authorized host and complete the physical-iPhone checklist before claiming Safari/on-device verification. Chromium viewport results are supplemental and do not replace these checks. No deployment was performed for this refinement.
+
+
+## 2,560-prompt refinement verification (2026-10-19)
+
+The final content/UX build passed lint, all 180 unit/integration tests, all six content validation tests, production build and 38 desktop/mobile Chromium browser regressions. The canonical 95-test run was attempted; Windows Application Control again blocked WebKit startup for all 57 WebKit cases (`spawn UNKNOWN`, confirmed by direct executable launch). Nine supplemental Chromium viewport cases at 375/390/430 px passed. WebKit/Safari and the physical-iPhone checklist remain outstanding; do not treat Chromium phone dimensions as WebKit evidence. No host security policy or learning database migration was changed. The new bank is additive, backups remain data v4, and no deployment was performed by this task.

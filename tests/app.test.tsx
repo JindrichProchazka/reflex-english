@@ -12,7 +12,7 @@ afterEach(async () => {
   window.location.hash = '/';
   await db.delete();
 });
-it('supports labelled typed input, hides the full answer on first failure and reveals it on the second', async () => {
+it('supports labelled answer buttons, hides the full answer on first failure and requires typed correction on the second', async () => {
   window.location.hash = '/';
   const user = userEvent.setup();
   render(
@@ -28,20 +28,21 @@ it('supports labelled typed input, hides the full answer on first failure and re
       await screen.findByRole('region', { name: 'IN / ON / AT' }),
     ).getByRole('button', { name: 'Start Normal' }),
   );
-  await user.type(await screen.findByLabelText('Missing preposition'), 'wrong');
+  await screen.findByRole('group', { name: 'Answer choices' });
   const prompt = screen.getByTestId('prompt').textContent;
   const expected = concepts
     .flatMap((c) => c.exercises)
     .find((e) => e.prompt === prompt)!.answer;
-  await user.click(screen.getByRole('button', { name: 'Check answer' }));
+  const wrong = ['in', 'on', 'at'].find((a) => a !== expected)!;
+  await user.click(screen.getByRole('button', { name: wrong.toUpperCase() }));
   await screen.findByText('Not quite. Try again.');
   expect(screen.queryByText(/The answer is/)).not.toBeInTheDocument();
-  await user.type(screen.getByLabelText('Missing preposition'), 'wrong');
-  await user.click(screen.getByRole('button', { name: 'Check answer' }));
+  await new Promise((r) => setTimeout(r, 400));
+  await user.click(screen.getByRole('button', { name: wrong.toUpperCase() }));
   expect(
     await screen.findByText(`The answer is “${expected}”.`),
   ).toBeInTheDocument();
   expect(
-    screen.getByRole('button', { name: 'Reproduce answer' }),
+    await screen.findByRole('button', { name: 'Reproduce answer' }),
   ).toBeDisabled();
 });

@@ -59,7 +59,7 @@ async function complete(db: LearningDatabase, session: Session) {
 }
 describe('pure prompt recency in the shared engine', () => {
   it.each(drills.map((d) => [d.id, d] as const))(
-    '%s normally leaves at least thirty other prompts before exact repetition across sessions',
+    '%s normally leaves at least fifty other prompts before exact repetition across sessions',
     (_id, drill) => {
       let history: PromptHistory = {
         [drill.id]: {
@@ -69,7 +69,7 @@ describe('pure prompt recency in the shared engine', () => {
       };
       const last = new Map<string, number>();
       let index = 0;
-      for (let round = 0; round < 7; round++) {
+      for (let round = 0; round < 16; round++) {
         let s = startSession(
           `recency-${round}`,
           now,
@@ -163,6 +163,57 @@ describe('pure prompt recency in the shared engine', () => {
   });
 });
 describe('bounded IndexedDB history and compatibility', () => {
+  it('restores data-v4 sessions from the 1,363-prompt bank without rewriting their snapshots or progress', async () => {
+    const db = database();
+    const content = drillById('articles')!.concepts.map((c) => ({
+      ...c,
+      exercises: c.exercises.filter((e) => !e.id.includes(':daily:')),
+    }));
+    expect(content.flatMap((c) => c.exercises)).toHaveLength(140);
+    const old = startSession(
+      'old-bank-v4',
+      now,
+      content,
+      [],
+      undefined,
+      undefined,
+      { initialLimit: 5 },
+    );
+    Object.assign(old, {
+      content,
+      module: 'drill',
+      drillId: 'articles',
+      drillSize: 'quick',
+    });
+    await db.sessions.add(old);
+    const failed = (await recordAnswer(db, old, 'wrong', 222, now + 1)).session;
+    const backup = parseBackup(JSON.stringify(await exportBackup(db, now + 2)));
+    expect(backup.dataVersion).toBe(4);
+    const restored = database();
+    await restoreBackup(restored, backup, {
+      confirmed: true,
+      onSafetyBackup: () => {},
+    });
+    const resumed = (await loadReviewSession(restored, failed.id))!;
+    expect(resumed.content).toEqual(failed.content);
+    expect(resumed.queue).toEqual(failed.queue);
+    expect(resumed.exerciseId).toBe(failed.exerciseId);
+    expect(resumed.feedback).toBe('hint');
+    expect(await restored.attempts.count()).toBe(1);
+    expect(
+      (await restored.reviews.get(failed.current!.conceptId))?.lastErrorSession,
+    ).toBe(failed.id);
+    const current = await beginDrillSession(
+      restored,
+      'articles',
+      'normal',
+      now + 3,
+    );
+    expect(current.content!.flatMap((c) => c.exercises)).toHaveLength(260);
+    expect((await restored.sessions.get(failed.id))!.content).toEqual(
+      failed.content,
+    );
+  });
   it('records an unanswered prompt before display, resumes it on reopen without adding a fake presentation, and awards no mastery', async () => {
     const db = database(),
       s = await beginDrillSession(db, 'articles', 'quick', now);
@@ -231,7 +282,7 @@ describe('bounded IndexedDB history and compatibility', () => {
       'normal',
       now + 10000,
     );
-    expect(before.promptIds.slice(-30)).not.toContain(fresh.exerciseId);
+    expect(before.promptIds.slice(-50)).not.toContain(fresh.exerciseId);
   });
   it('rolls back attempts, schedules, session and prompt history together when saving recency fails', async () => {
     const db = database(),

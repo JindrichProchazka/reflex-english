@@ -92,8 +92,8 @@ export function contextConcept(
       lessonEvidence: fullSentence ? 'production' : 'understanding',
       contextId: `example:${index === 0 || index === 3 ? 0 : 1}`,
       instruction: fullSentence
-        ? 'Complete the gap, then type the WHOLE sentence using the given frame.'
-        : 'Type only the missing word or phrase.',
+        ? 'Type the whole sentence.'
+        : 'Type the missing word or phrase.',
     };
   });
   return {

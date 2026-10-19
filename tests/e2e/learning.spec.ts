@@ -1,3 +1,4 @@
+import { answer } from './answer';
 import { test, expect } from '@playwright/test';
 import { drillById } from '../../src/content/drills';
 const concepts = drillById('in-on-at')!.concepts;
@@ -22,20 +23,16 @@ test('mistakes lead to delayed retrieval, completion and durable progress', asyn
   const first = concepts
     .flatMap((c) => c.exercises)
     .find((e) => e.prompt === original)!;
-  const input = page.getByLabel('Missing preposition');
-  await input.fill('wrong');
-  await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await answer(page, 'wrong');
   await expect(page.getByText('Not quite. Try again.')).toBeVisible();
   await expect(page.getByText(/The answer is/)).toHaveCount(0);
   await page.reload();
   await expect(page.getByText('Not quite. Try again.')).toBeVisible();
-  await input.fill('wrong');
-  await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await answer(page, 'wrong');
   await expect(
     page.getByText(`The answer is “${first.answer}”.`),
   ).toBeVisible();
-  await input.fill(first.answer);
-  await page.getByRole('button', { name: 'Reproduce answer' }).click();
+  await answer(page, first.answer);
   await expect(prompt).not.toHaveText(original);
   const seenKinds: string[] = [];
   let steps = 0;
@@ -50,10 +47,7 @@ test('mistakes lead to delayed retrieval, completion and durable progress', asyn
       expect(text).not.toBe(original);
       seenKinds.push(await page.locator('.practice > .eyebrow').innerText());
     }
-    await input.fill(exercise.answer);
-    await page
-      .getByRole('button', { name: 'Check answer', exact: true })
-      .click();
+    await answer(page, exercise.answer);
     // Read the next prompt or saved state atomically: the final prompt can
     // disappear between a visibility check and an innerText() call.
     await expect
@@ -69,8 +63,27 @@ test('mistakes lead to delayed retrieval, completion and durable progress', asyn
   expect(seenKinds[1]).toContain('CLOSING RECALL');
   await expect(page.getByText('PRACTICE SAVED', { exact: true })).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: 'What happens next' }),
+    page.getByRole('heading', { name: 'Needs more practice' }),
   ).toBeVisible();
+  const weak = page.getByRole('region', { name: 'Needs more practice' });
+  await expect(weak).toContainText(
+    concepts.find((c) => c.id === first.conceptId)!.title,
+  );
+  await expect(weak).toContainText(
+    /review (today|tomorrow|in \d+ (days|weeks))/,
+  );
+  await expect(page.locator('main time').first()).not.toBeVisible();
+  await page.getByText('View all scheduled reviews', { exact: true }).click();
+  await expect(page.locator('main time').first()).toBeVisible();
+  await page.getByText('View all scheduled reviews', { exact: true }).click();
+  await expect(page.locator('body')).toHaveJSProperty(
+    'scrollWidth',
+    await page.evaluate(() => innerWidth),
+  );
+  await page.screenshot({
+    path: `test-results/session-summary-${test.info().project.name}.png`,
+    fullPage: true,
+  });
   await page.reload();
   await expect(page.getByText('PRACTICE SAVED', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Back to home' }).click();
